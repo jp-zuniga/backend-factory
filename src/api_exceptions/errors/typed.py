@@ -13,6 +13,7 @@ class TypedApiError[T: StrEnum](ApiError):
     @override
     def __init__(
         self,
+        *args: object,
         detail: str | None = None,
         field_errors: dict | None = None,
         http_status: HTTPStatus | None = None,

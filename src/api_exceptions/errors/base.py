@@ -18,6 +18,7 @@ class ApiError(Exception):
     @override
     def __init__(
         self,
+        *args: object,
         detail: str | None = None,
         field_errors: dict[str, str] | None = None,
         http_status: HTTPStatus | None = None,

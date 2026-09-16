@@ -1,6 +1,7 @@
+from inspect import iscoroutinefunction
 from typing import TYPE_CHECKING, cast
 
-from asgiref.sync import iscoroutinefunction, sync_to_async
+from asgiref.sync import sync_to_async
 from django.core.handlers.asgi import ASGIRequest as DjangoASGIRequest
 from django.core.handlers.wsgi import WSGIRequest as DjangoWSGIRequest
 from django.utils.decorators import sync_and_async_middleware

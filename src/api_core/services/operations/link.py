@@ -26,7 +26,7 @@ class LinkOperation[Get: DTO](ModelOperation[Get], ABC):
     scope: ClassVar[RequestScopes] = RequestScopes.PATH
 
     @override
-    def __init__(
+    def __init__(  # ty: ignore[invalid-method-override]
         self,
         *fields: str,
         mapper: ModelMapper[Get],
