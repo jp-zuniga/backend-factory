@@ -1,9 +1,9 @@
-from .base import LaxDTO
+from .base import DTO
 
 ########################################################################################
 
 
-class UpdateManyToManyQuery(LaxDTO):
+class UpdateManyToManyQuery(DTO):
     overwrite: bool
 
 

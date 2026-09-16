@@ -23,7 +23,6 @@ if TYPE_CHECKING:
     from pydantic import PositiveInt
 
     from api_auth.models import ApiUser
-    from api_auth.schemas.login import LoginPost
     from api_auth.schemas.user import ApiUserGet, ApiUserPost
     from api_utils.types import DatabaseModel
 
@@ -31,11 +30,35 @@ if TYPE_CHECKING:
 
 
 @sensitive_variables()
-async def authenticate_user(data: LoginPost, request: HttpRequest) -> ApiUser:
+async def authenticate_user(
+    *,
+    password: str,
+    request: HttpRequest,
+    username: str,
+) -> ApiUser:
+    """
+    Resolve the account behind a set of credentials.
+
+    The credentials arrive already converted to the kwargs django's
+    backends expect, which is what `ObtainTokensPayload` carries.
+
+    Args:
+        password: The password that was sent.
+        request: The request the credentials arrived with.
+        username: The name of the account being opened.
+
+    Returns:
+        The account the credentials belong to.
+
+    Raises:
+        UnauthorizedError: When no active account matches them.
+
+    """
+
     user: ApiUser | None = await aauthenticate(
         request,
-        password=data.password,
-        username=data.username,
+        password=password,
+        username=username,
     )
 
     if user is None:

@@ -6,6 +6,7 @@ from dmr.exceptions import (
     RequestSerializationError,
     TooManyRequestsError,
 )
+from dmr.security import add_www_authenticate
 
 from .errors import (
     ApiError,
@@ -29,7 +30,7 @@ if TYPE_CHECKING:
 
 
 def exc_handler(
-    endpoint: Endpoint,  # ruff: ignore[unused-function-argument]
+    endpoint: Endpoint,
     controller: Controller,
     exc: Exception,
 ) -> HttpResponse:
@@ -40,6 +41,8 @@ def exc_handler(
     elif isinstance(exc, NotAcceptableError):
         parsed = UnacceptableHeaderError()
     elif isinstance(exc, NotAuthenticatedError):
+        add_www_authenticate(exc, endpoint.metadata.auth)
+
         parsed = UnauthorizedError()
     elif oversized := ContentTooLargeError.unwrap(exc):
         parsed = oversized

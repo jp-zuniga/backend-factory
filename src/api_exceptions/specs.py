@@ -77,6 +77,7 @@ UnacceptableHeaderSpec = ResponseSpec(
 )
 
 UnauthorizedSpec = ResponseSpec(
+    headers={"WWW-Authenticate": HeaderSpec(required=False, skip_validation=True)},
     return_type=ApiErrorResponse.from_exc(UnauthorizedError),
     status_code=UnauthorizedError.default_http_status,
 )

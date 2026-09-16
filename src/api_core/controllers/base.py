@@ -9,7 +9,9 @@ from dmr.renderers import Renderer
 from dmr.serializer import BaseSerializer
 from dmr.throttling import AsyncThrottle, Rate
 
+from api_auth.enums import TokenTypes
 from api_auth.security import JwtCookieAsyncAuth, JwtHeaderAsyncAuth, JwtRbacAsyncAuth
+from api_auth.services.jwt import REQUIRED_CLAIMS
 from api_core.config import CONFIG
 from api_exceptions.schemas import ApiErrorResponse
 from api_utils.types import UsableHttpRequest
@@ -28,11 +30,14 @@ class BaseController[Serializer: BaseSerializer](
     auth: ClassVar[Sequence[JwtRbacAsyncAuth]] = (
         JwtCookieAsyncAuth(
             algorithm=CONFIG.JWT_ALGORITHM,
+            cookie_name=TokenTypes.ACCESS,
+            require_claims=REQUIRED_CLAIMS,
             secret=CONFIG.JWT_SECRET_KEY.get_secret_value(),
             security_scheme_name="jwtCookie",
         ),
         JwtHeaderAsyncAuth(
             algorithm=CONFIG.JWT_ALGORITHM,
+            require_claims=REQUIRED_CLAIMS,
             secret=CONFIG.JWT_SECRET_KEY.get_secret_value(),
             security_scheme_name="jwtHeader",
         ),

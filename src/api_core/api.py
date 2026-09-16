@@ -5,8 +5,6 @@ from dmr.routing import Router
 
 import api_auth.api
 
-from api_core.controllers.routers import sort_urls
-
 if TYPE_CHECKING:
     from typing import Final
 
@@ -14,9 +12,9 @@ if TYPE_CHECKING:
 
 ########################################################################################
 
-router: Final[Router] = Router(
-    prefix="",
-    urls=sort_urls((*api_auth.api.router.urls,)),
-)
+router: Final[Router] = Router(prefix="")
+
+# `Router.include` keeps each router's own tags, unlike splicing its urls
+router.include(api_auth.api.router)
 
 schema: Final[OpenAPI] = build_schema(router)

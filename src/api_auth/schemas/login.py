@@ -5,10 +5,6 @@ from .user import ApiUserInlineGet
 
 ########################################################################################
 
-type LoginPost = MobileLoginPost | WebLoginPost
-
-########################################################################################
-
 
 class LoginInput(DTO):
     username: Username

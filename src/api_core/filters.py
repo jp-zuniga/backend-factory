@@ -128,7 +128,7 @@ class TypedChoiceFilter(ChoiceFilter):
         method: str | None = None,
         **kwargs: object,
     ) -> None:
-        if enum is None or not issubclass(TextChoices, enum):
+        if enum is None or not issubclass(enum, TextChoices):
             raise ValueError(
                 "Must provide a TextChoices subclass for enum keyword-argument.",
             )

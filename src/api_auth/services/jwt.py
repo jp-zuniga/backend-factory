@@ -40,15 +40,6 @@ class EncodedJwtPair(NamedTuple):
 
 
 @dataclass(frozen=True, slots=True)
-class JwtSession:
-    tokens: EncodedJwtPair
-    user: ApiUser
-
-
-########################################################################################
-
-
-@dataclass(frozen=True, slots=True)
 class ParsedJwtPair:
     access: JWToken | None = None
     refresh: JWToken | None = None
@@ -71,19 +62,6 @@ class ParsedJwtPair:
         subjects: frozenset[str] = self.subjects
 
         return next(iter(subjects)) if len(subjects) == 1 else None
-
-    def subject(self) -> str:
-        subjects: frozenset[str] = self.subjects
-
-        if len(subjects) > 1:
-            raise UnauthorizedError(
-                detail="Los tokens proporcionados le pertenecen a usuarios distintos.",
-            )
-
-        if not subjects:
-            raise UnauthorizedError
-
-        return next(iter(subjects))
 
 
 ########################################################################################

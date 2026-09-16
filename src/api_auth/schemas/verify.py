@@ -1,6 +1,9 @@
+from typing import Annotated
+
+from pydantic import Field
+
 from api_auth.enums import TokenTypes
-from api_core.schemas.base import DTO, PermissiveDTO
-from api_core.schemas.get import LaxEnum
+from api_core.schemas.base import DTO
 
 from .types import JwtToken
 
@@ -9,17 +12,7 @@ from .types import JwtToken
 
 class MobileVerifyPost(DTO):
     token: JwtToken
-
-    # a json body carries the member's value, never the member itself
-    type: LaxEnum[TokenTypes]
-
-
-########################################################################################
-
-
-class WebVerifyPost(PermissiveDTO):
-    access: JwtToken | None = None
-    refresh: JwtToken | None = None
+    type: Annotated[TokenTypes, Field(strict=False)]
 
 
 ########################################################################################

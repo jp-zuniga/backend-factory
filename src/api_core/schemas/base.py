@@ -11,15 +11,7 @@ class DTO(BaseModel):
         from_attributes=True,
         frozen=True,
         str_strip_whitespace=True,
-        strict=True,
     )
-
-
-########################################################################################
-
-
-class LaxDTO(DTO):
-    model_config = ConfigDict(strict=False)
 
 
 ########################################################################################

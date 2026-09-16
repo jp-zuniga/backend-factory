@@ -176,6 +176,18 @@ class ApiConfig(BaseSettings, PermissiveDTO):
         return "Lax" if self.DEBUG and not self.DEPLOY else "None"
 
     @cached_property
+    def cookie_samesite_policy(self) -> Literal["lax", "none"]:
+        """
+        `cookie_samesite`, spelled the way `dmr.cookies.CookieSpec` wants it.
+
+        Django writes the flag verbatim and browsers match it
+        case-insensitively, but `CookieSpec` compares the value it
+        describes against the one we set, so the two must agree exactly.
+        """
+
+        return "lax" if self.cookie_samesite == "Lax" else "none"
+
+    @cached_property
     def cookie_secure(self) -> bool:
         return not self.DEBUG or self.DEPLOY
 

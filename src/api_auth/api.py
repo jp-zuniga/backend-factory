@@ -42,6 +42,7 @@ from api_core.controllers.routers import (
     route_controllers,
     route_inferred_controller,
     route_link_controller,
+    sort_urls,
 )
 
 if TYPE_CHECKING:
@@ -52,7 +53,7 @@ if TYPE_CHECKING:
 router: Final[Router] = Router(
     prefix="",
     tags=["auth"],
-    urls=(
+    urls=sort_urls((
         *route_controllers(
             ApiUserDetailController,
             ApiUserListController,
@@ -99,5 +100,5 @@ router: Final[Router] = Router(
         ),
         route_link_controller(ApiUserGroupsLinkController, "auth"),
         route_link_controller(ApiUserPermissionsLinkController, "auth"),
-    ),
+    )),
 )

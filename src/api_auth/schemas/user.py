@@ -33,7 +33,7 @@ class ApiUserInlineGet(BaseGet):
     last_name: str
     username: str
     email: str
-    email_verified_at: datetime | None
+    email_verified_at: datetime
 
 
 ########################################################################################

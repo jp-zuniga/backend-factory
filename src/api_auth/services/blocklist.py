@@ -14,10 +14,9 @@ from .jwt import (
 if TYPE_CHECKING:
     from collections.abc import Sequence
 
+    from django.contrib.auth.base_user import AbstractBaseUser
     from django.db.models import QuerySet
     from dmr.security.jwt.token import JWToken
-
-    from api_auth.models import ApiUser
 
     from .jwt import ParsedJwtPair
 
@@ -28,7 +27,10 @@ REVOKED_DETAIL: Final[str] = "El token proporcionado ya fue revocado."
 ########################################################################################
 
 
-async def blocklist_jwt_pair(pair: ParsedJwtPair, user: ApiUser | None = None) -> None:
+async def blocklist_jwt_pair(
+    pair: ParsedJwtPair,
+    user: AbstractBaseUser | None = None,
+) -> None:
     await blocklist_jwts(
         pair.tokens,
         user if user is not None else await find_jwt_subject(pair.optional_subject()),
@@ -40,7 +42,7 @@ async def blocklist_jwt_pair(pair: ParsedJwtPair, user: ApiUser | None = None) -
 
 async def blocklist_jwts(
     tokens: Sequence[JWToken],
-    user: ApiUser | None = None,
+    user: AbstractBaseUser | None = None,
 ) -> None:
     if not tokens:
         return
@@ -61,7 +63,7 @@ async def blocklist_jwts(
 ########################################################################################
 
 
-async def consume_jwt(token: JWToken, user: ApiUser | None = None) -> bool:
+async def consume_jwt(token: JWToken, user: AbstractBaseUser | None = None) -> bool:
     _, created = await BlocklistedJWToken.objects.aget_or_create(  # ty:ignore[unresolved-attribute]
         jti=jwt_revocation_key(token),
         defaults={

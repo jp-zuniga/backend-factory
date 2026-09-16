@@ -1,13 +1,13 @@
 from abc import ABC, abstractmethod
 from typing import override
 
-from .base import LaxDTO
+from .base import DTO
 from .pagination import PageQuery
 
 ########################################################################################
 
 
-class FilterQuery(ABC, LaxDTO):
+class FilterQuery(ABC, DTO):
     @abstractmethod
     def get_filters(self) -> dict:
         pass
@@ -29,7 +29,7 @@ class PaginatedFilterQuery(FilterQuery, PageQuery):
 ########################################################################################
 
 
-class UnpaginatedFilterQuery(FilterQuery, LaxDTO):
+class UnpaginatedFilterQuery(FilterQuery, DTO):
     @override
     def get_filters(self) -> dict:
         return self.model_dump(exclude_unset=True, mode="json")

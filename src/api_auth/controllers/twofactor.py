@@ -1,13 +1,17 @@
 from http import HTTPStatus
-from typing import override
 
 from django.http import HttpResponse
-from django.views.decorators.debug import sensitive_variables
-from dmr import Body, CookieSpec, Cookies, ResponseSpec, modify, validate
+from django.views.decorators.debug import (
+    sensitive_post_parameters,
+    sensitive_variables,
+)
+from dmr import Body, Cookies, ResponseSpec, modify, validate
+from dmr.decorators import endpoint_decorator
+from dmr.endpoint import ValidateAnyCallable
 from dmr.security.jwt.auth import set_request_attrs
 
 from api_auth.enums import TokenTypes
-from api_auth.models import ApiUserTotpDevice
+from api_auth.models import ApiUser, ApiUserTotpDevice
 from api_auth.schemas.login import MobileLoginResponse, WebLoginResponse
 from api_auth.schemas.twofactor import (
     MobileTwoFactorPost,
@@ -20,8 +24,7 @@ from api_auth.schemas.twofactor import (
     WebTwoFactorPost,
 )
 from api_auth.schemas.user import ApiUserInlineGet
-from api_auth.services.cookies import build_cookied_response, unset_jwt_cookie
-from api_auth.services.jwt import JwtSession
+from api_auth.services.jwt import EncodedJwtPair, build_jwt_pair
 from api_auth.services.session import resolve_challenge
 from api_auth.services.twofactor import (
     TotpEnrollment,
@@ -35,72 +38,101 @@ from api_auth.services.twofactor import (
 from api_core.controllers.serializers import CustomPydanticFastSerializer
 from api_core.services.mappers import instance_mapper
 
-from .base import MobileAuthController, PrivateAuthController, WebAuthController
+from .base import (
+    NO_STORE_HEADERS,
+    CookieTokensMixin,
+    MobileAuthController,
+    PrivateAuthController,
+    WebAuthController,
+    discarded_spec,
+)
 
 ########################################################################################
 
 
 class MobileTwoFactorController(MobileAuthController[CustomPydanticFastSerializer]):
-    @modify(status_code=HTTPStatus.OK)
+    """
+    Trade a challenge token and a second factor code for a token pair.
+    """
+
+    @modify(headers=NO_STORE_HEADERS, status_code=HTTPStatus.OK)
     @sensitive_variables()
+    @endpoint_decorator(sensitive_post_parameters())
     async def post(self, parsed_body: Body[MobileTwoFactorPost]) -> MobileLoginResponse:
-        session: JwtSession = await resolve_challenge(
+        user: ApiUser = await resolve_challenge(
             parsed_body.challenge,
             parsed_body.code,
         )
 
-        set_request_attrs(self.request, session.user)
+        set_request_attrs(self.request, user)
+
+        tokens: EncodedJwtPair = build_jwt_pair(user)
 
         return MobileLoginResponse(
-            access=session.tokens.access,
-            refresh=session.tokens.refresh,
-            user=instance_mapper(session.user, ApiUserInlineGet),
+            access=tokens.access,
+            refresh=tokens.refresh,
+            user=instance_mapper(user, ApiUserInlineGet),
         )
 
 
 ########################################################################################
 
 
-class WebTwoFactorController(WebAuthController[CustomPydanticFastSerializer]):
-    @override
+class WebTwoFactorController(
+    WebAuthController[CustomPydanticFastSerializer],
+    CookieTokensMixin,
+):
+    """
+    The same exchange, with the challenge and the tokens in cookies.
+
+    `dmr` ships no controller for this step, so the flow is spelled out
+    here; every cookie it writes still comes from `CookieTokensMixin`,
+    which is what the rest of the web flow uses.
+    """
+
+    @classmethod
+    def validate_spec(cls) -> ValidateAnyCallable:
+        return validate(
+            ResponseSpec(
+                return_type=WebLoginResponse,
+                cookies={
+                    TokenTypes.CHALLENGE: discarded_spec(cls.challenge_cookie_spec()),
+                    **cls.issued_cookies_spec(),
+                    **cls.csrf_cookie_spec(),
+                },
+                headers=cls.response_headers_spec(),
+                status_code=HTTPStatus.OK,
+            ),
+        )
+
     @sensitive_variables()
-    @validate(
-        ResponseSpec(
-            cookies={
-                TokenTypes.ACCESS: CookieSpec(skip_validation=True),
-                TokenTypes.CHALLENGE: CookieSpec(skip_validation=True),
-                TokenTypes.REFRESH: CookieSpec(skip_validation=True),
-            },
-            return_type=WebLoginResponse,
-            status_code=HTTPStatus.OK,
-        ),
-        validate_responses=False,
-    )
+    @endpoint_decorator(sensitive_post_parameters())
+    @validate.lazy(validate_spec)
     async def post(
         self,
         parsed_body: Body[WebTwoFactorPost],
         parsed_cookies: Cookies[WebChallengeCookies],
     ) -> HttpResponse:
-        await super().post()
+        self.check_csrf()
 
-        session: JwtSession = await resolve_challenge(
+        user: ApiUser = await resolve_challenge(
             parsed_cookies.challenge,
             parsed_body.code,
         )
 
-        set_request_attrs(self.request, session.user)
+        set_request_attrs(self.request, user)
 
-        response: HttpResponse = build_cookied_response(
-            ctrl=self,
-            data=WebLoginResponse(
-                user=instance_mapper(session.user, ApiUserInlineGet),
-            ),
-            tokens=session.tokens,
+        self.rotate_csrf_token()
+
+        return self.to_response(
+            WebLoginResponse(user=instance_mapper(user, ApiUserInlineGet)),
+            cookies={
+                **self.issue_cookies(),
+                **self.discarded_challenge_cookie(),
+            },
+            headers=self.response_headers(),
+            status_code=HTTPStatus.OK,
         )
-
-        unset_jwt_cookie(TokenTypes.CHALLENGE, response)
-
-        return response
 
 
 ########################################################################################
@@ -123,7 +155,10 @@ class TwoFactorController(PrivateAuthController[CustomPydanticFastSerializer]):
 
 
 class TwoFactorSetupController(PrivateAuthController[CustomPydanticFastSerializer]):
-    @modify(status_code=HTTPStatus.CREATED)
+    @modify(
+        headers=NO_STORE_HEADERS,
+        status_code=HTTPStatus.CREATED,
+    )
     @sensitive_variables()
     async def post(self) -> TwoFactorSetupResponse:
         enrollment: TotpEnrollment = await start_enrollment(self.request.user)
@@ -135,8 +170,12 @@ class TwoFactorSetupController(PrivateAuthController[CustomPydanticFastSerialize
 
 
 class TwoFactorConfirmController(PrivateAuthController[CustomPydanticFastSerializer]):
-    @modify(status_code=HTTPStatus.CREATED)
+    @modify(
+        headers=NO_STORE_HEADERS,
+        status_code=HTTPStatus.CREATED,
+    )
     @sensitive_variables()
+    @endpoint_decorator(sensitive_post_parameters())
     async def post(
         self,
         parsed_body: Body[TwoFactorCodePost],
@@ -150,8 +189,12 @@ class TwoFactorConfirmController(PrivateAuthController[CustomPydanticFastSeriali
 
 
 class TwoFactorRecoveryController(PrivateAuthController[CustomPydanticFastSerializer]):
-    @modify(status_code=HTTPStatus.CREATED)
+    @modify(
+        headers=NO_STORE_HEADERS,
+        status_code=HTTPStatus.CREATED,
+    )
     @sensitive_variables()
+    @endpoint_decorator(sensitive_post_parameters())
     async def post(
         self,
         parsed_body: Body[TwoFactorCodePost],
@@ -169,6 +212,7 @@ class TwoFactorRecoveryController(PrivateAuthController[CustomPydanticFastSerial
 class TwoFactorDisableController(PrivateAuthController[CustomPydanticFastSerializer]):
     @modify(status_code=HTTPStatus.NO_CONTENT)
     @sensitive_variables()
+    @endpoint_decorator(sensitive_post_parameters())
     async def post(self, parsed_body: Body[TwoFactorDisablePost]) -> None:
         await disable_two_factor(
             code=parsed_body.code,

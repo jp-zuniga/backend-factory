@@ -2,12 +2,12 @@ from typing import Annotated
 
 from pydantic import Field, NonNegativeInt, PositiveInt
 
-from .base import DTO, LaxDTO
+from .base import DTO
 
 ########################################################################################
 
 
-class PageQuery(LaxDTO):
+class PageQuery(DTO):
     page_size: Annotated[PositiveInt, Field(default=20, le=100)]
     page: Annotated[PositiveInt, Field(default=1)]
 

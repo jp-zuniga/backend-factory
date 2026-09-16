@@ -1,35 +1,39 @@
 from http import HTTPStatus
 
 from django.http import HttpResponse
-from dmr import HeaderSpec, ResponseSpec, validate
-from dmr.negotiation import request_renderer
-from dmr.response import build_response
+from dmr import ResponseSpec, validate
+from dmr.endpoint import ValidateAnyCallable
 
-from api_auth.services.csrf import attach_csrf
-from api_core.config import CONFIG
+from api_auth.services.csrf import csrf_headers
 from api_core.controllers.serializers import CustomPydanticFastSerializer
 
-from .base import AuthController
+from .base import CSRF_HEADER_SPEC, NO_STORE_SPEC, NO_STORE_VALUES, AuthController
 
 ########################################################################################
 
 
 class CsrfController(AuthController[CustomPydanticFastSerializer]):
-    @validate(
-        ResponseSpec(
-            headers={CONFIG.csrf_header: HeaderSpec(skip_validation=True)},
-            return_type=None,
-            status_code=HTTPStatus.NO_CONTENT,
-        ),
-        validate_responses=False,
-    )
-    async def get(self) -> HttpResponse:
-        return attach_csrf(
-            response=build_response(
-                raw_data=None,
-                renderer=request_renderer(self.request),
-                serializer=CustomPydanticFastSerializer,
+    """
+    Hand a browser client its CSRF token.
+
+    The cookie that carries it is `httponly`, so the header is the only
+    way a client can ever read it.
+    """
+
+    @classmethod
+    def validate_spec(cls) -> ValidateAnyCallable:
+        return validate(
+            ResponseSpec(
+                return_type=None,
+                headers={**NO_STORE_SPEC, **CSRF_HEADER_SPEC},
                 status_code=HTTPStatus.NO_CONTENT,
             ),
-            request=self.request,
+        )
+
+    @validate.lazy(validate_spec)
+    async def get(self) -> HttpResponse:
+        return self.to_response(
+            None,
+            headers={**NO_STORE_VALUES, **csrf_headers(self.request)},
+            status_code=HTTPStatus.NO_CONTENT,
         )
