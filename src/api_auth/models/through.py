@@ -32,7 +32,7 @@ class ApiUserGroups(ApiModel):
         constraints: Sequence[UniqueConstraint] = (
             UniqueConstraint(
                 fields=["api_user", "group"],
-                name="unq_apiusergroups_apiuser_group",
+                name="unq_%(class)s_apiuser_group",
             ),
         )
 
@@ -42,16 +42,12 @@ class ApiUserGroups(ApiModel):
 
 @track_table()
 class ApiUserPermissions(ApiModel):
-    # all models in a relation chain must use either
-    # ALL python callbacks or ALL database callbacks for `on_delete`
     api_user = ForeignKey(
         on_delete=CASCADE,
         related_name="+",
         to=ApiUser,
     )
 
-    # Permission.content_type uses python `CASCADE`
-    # so it must be mirrored here
     permission = ForeignKey(
         on_delete=CASCADE,
         related_name="+",
@@ -62,6 +58,6 @@ class ApiUserPermissions(ApiModel):
         constraints: Sequence[UniqueConstraint] = (
             UniqueConstraint(
                 fields=["api_user", "permission"],
-                name="unq_apiuserpermissions_apiuser_permission",
+                name="unq_%(class)s_apiuser_permission",
             ),
         )

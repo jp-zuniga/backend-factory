@@ -28,6 +28,18 @@ USE_X_FORWARDED_HOST: Final[bool] = CONFIG.DEPLOY
 
 ########################################################################################
 
+DEFAULT_FROM_EMAIL: Final[str] = CONFIG.DEFAULT_FROM_EMAIL
+EMAIL_BACKEND: Final[str] = CONFIG.EMAIL_BACKEND
+EMAIL_HOST: Final[str] = CONFIG.EMAIL_HOST
+EMAIL_HOST_PASSWORD: Final[str] = CONFIG.EMAIL_HOST_PASSWORD.get_secret_value()
+EMAIL_HOST_USER: Final[str] = CONFIG.EMAIL_HOST_USER
+EMAIL_PORT: Final[int] = CONFIG.EMAIL_PORT
+EMAIL_USE_TLS: Final[bool] = CONFIG.EMAIL_USE_TLS
+
+FRONTEND_URL: Final[str] = CONFIG.frontend_url
+
+########################################################################################
+
 BASE_DIR: Final[Path] = ROOT / "src"
 MEDIA_ROOT: Final[Path] = BASE_DIR / "media"
 

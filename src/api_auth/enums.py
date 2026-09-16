@@ -14,7 +14,15 @@ class ApiUserTypes(TextChoices):
 
 class TokenTypes(TextChoices):
     ACCESS = "access"
+    CHALLENGE = "challenge"
     REFRESH = "refresh"
+
+
+########################################################################################
+
+
+class VerificationPurposes(TextChoices):
+    EMAIL = "email_verification"
 
 
 ########################################################################################

@@ -13,11 +13,18 @@ from django.db.models import (
     Q,
     UniqueConstraint,
 )
-from django.db.models.functions import Lower, Now, Upper
-from django.utils.timezone import now
-from pgtrigger import Insert, Protect, ReadOnly, SoftDelete
+from django.db.models.functions import Lower, Upper
+from pgtrigger import (
+    Before,
+    F as TriggerF,
+    Insert,
+    Protect,
+    Q as TriggerQ,
+    Trigger,
+    Update,
+)
 
-from api_core.models.base import ApiModel
+from api_core.models.base import ApiModel, ApiSoftDeleteModel
 from api_utils.db import ImmutableUnaccent, track_table
 
 from .manager import ApiUserManager
@@ -27,7 +34,6 @@ if TYPE_CHECKING:
     from typing import Final
 
     from django.db.models import QuerySet
-    from pgtrigger import Trigger
 
     from ty_extensions import Intersection
 
@@ -35,16 +41,15 @@ if TYPE_CHECKING:
 
 
 @track_table()
-class ApiUser(ApiModel, AbstractBaseUser, PermissionsMixin):
+class ApiUser(ApiSoftDeleteModel, AbstractBaseUser, PermissionsMixin):
     first_name = CharField(db_default="", default="", max_length=100)
     last_name = CharField(db_default="", default="", max_length=100)
     email = EmailField(db_default="", default="")
     username = CharField(max_length=100)
     password = CharField(max_length=128)
 
-    created_at = DateTimeField(db_default=Now(), default=now)
+    email_verified_at = DateTimeField(db_default=None, default=None, null=True)
 
-    is_active = BooleanField(db_default=False, default=False)
     is_staff = BooleanField(db_default=False, default=False)
     is_superuser = BooleanField(db_default=False, default=False)
 
@@ -73,12 +78,12 @@ class ApiUser(ApiModel, AbstractBaseUser, PermissionsMixin):
             UniqueConstraint(
                 Lower("email"),
                 condition=Q(email__len__gt=0, is_active=True),
-                name="unq_apiuser_email",
+                name="unq_%(class)s_email",
             ),
             UniqueConstraint(
                 Lower("username"),
                 condition=Q(is_active=True),
-                name="unq_apiuser_username",
+                name="unq_%(class)s_username",
             ),
         )
 
@@ -88,7 +93,7 @@ class ApiUser(ApiModel, AbstractBaseUser, PermissionsMixin):
                     expression=Upper(ImmutableUnaccent("username")),
                     name="gin_trgm_ops",
                 ),
-                name="gin_apiuser_username",
+                name="gin_%(class)s_username",
             ),
             GinIndex(
                 OpClass(
@@ -96,16 +101,22 @@ class ApiUser(ApiModel, AbstractBaseUser, PermissionsMixin):
                     name="gin_trgm_ops",
                 ),
                 condition=Q(email__len__gt=0),
-                name="gin_apiuser_email",
+                name="gin_%(class)s_email",
             ),
-            Index(fields=["created_at"], name="idx_apiuser_createdat"),
-            Index(fields=["is_active"], name="idx_apiuser_isactive"),
+            Index(fields=["created_at"], name="idx_%(class)s_createdat"),
+            Index(fields=["email_verified_at"], name="idx_%(class)s_emailverifiedat"),
+            Index(fields=["is_active"], name="idx_%(class)s_isactive"),
         )
 
         ordering: Sequence[str] = ("username",)
         triggers: Sequence[Trigger] = (
             *ApiModel.Meta.triggers,
             Protect(name="trg_apiuser_protect_insert", operation=Insert),
-            ReadOnly(fields=["created_at"], name="trg_apiuser_readonly_createdat"),
-            SoftDelete(field="is_active", name="trg_apiuser_softdelete_isactive"),
+            Trigger(
+                condition=TriggerQ(old__email__df=TriggerF("new__email")),
+                func="NEW.email_verified_at = NULL; RETURN NEW;",
+                name="trg_apiuser_unverify_email",
+                operation=Update,
+                when=Before,
+            ),
         )

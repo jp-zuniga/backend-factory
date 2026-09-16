@@ -1,3 +1,5 @@
+from pydantic import ConfigDict
+
 from api_auth.schemas.types import JwtToken
 from api_core.schemas.base import DTO, PermissiveDTO
 
@@ -28,4 +30,7 @@ class MobileRefreshResponse(DTO):
 
 
 class WebRefreshPost(PermissiveDTO, RefreshInput):
+    # see `WebLogoutPost`: cookies arrive with company
+    model_config = ConfigDict(extra="ignore")
+
     refresh: JwtToken | None = None

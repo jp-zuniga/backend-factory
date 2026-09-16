@@ -14,6 +14,8 @@ from api_core.services.operations.m2m import exec_m2m_post
 from api_exceptions.enums import BadRequestErrorTypes, RequestScopes
 from api_exceptions.errors import BadRequestError, UnauthorizedError
 
+from .account import ensure_email_verified, issue_email_verification
+
 if TYPE_CHECKING:
     from collections.abc import Sequence
 
@@ -40,6 +42,8 @@ async def authenticate_user(data: LoginPost, request: HttpRequest) -> ApiUser:
         raise UnauthorizedError(
             detail="Las credenciales proporcionadas no son válidas.",
         )
+
+    ensure_email_verified(user)
 
     set_request_attrs(request, user)
 
@@ -130,9 +134,13 @@ class UserCreateOperation[
     @override
     @sensitive_variables()
     async def execute(self, data: dict) -> DatabaseModel:
-        return await sync_to_async(func=exec_m2m_post)(
+        user: DatabaseModel = await sync_to_async(func=exec_m2m_post)(
             *self.fields,
             data=data,
             qs=self.qs,
             user=True,
         )
+
+        await issue_email_verification(user)  # ty: ignore[invalid-argument-type]
+
+        return user

@@ -8,7 +8,7 @@ from django.db.transaction import get_connection
 from pghistory import track
 
 if TYPE_CHECKING:
-    from collections.abc import Callable
+    from collections.abc import Callable, Sequence
 
     from django.db.models.options import Options
 
@@ -60,8 +60,22 @@ def set_immediate_constraints() -> None:
 
 
 def track_table[Table: type[DatabaseModel]](
+    exclude: Sequence[str] | None = None,
     meta: dict | None = None,
 ) -> Callable[[Table], Table]:
+    """
+    Build a decorator that tracks a model's history with `pghistory`.
+
+    Args:
+        meta: Extra `Meta` options for the generated event model.
+        exclude: Names of the tracked model's fields that must never
+                 be copied into the event model, e.g. secrets.
+
+    Returns:
+        A decorator that attaches the event model to its table.
+
+    """
+
     meta: dict = meta or {}
     meta: dict = meta | {
         "indexes": (
@@ -106,6 +120,7 @@ def track_table[Table: type[DatabaseModel]](
             context_field=None,  # ty: ignore[invalid-argument-type]
             context_id_field=None,  # ty: ignore[invalid-argument-type]
             append_only=True,
+            exclude=exclude,  # ty: ignore[invalid-argument-type]
             model_name=f"{model.__name__}Event",
             meta=meta,
         )(model)

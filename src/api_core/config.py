@@ -1,3 +1,4 @@
+from collections.abc import Sequence
 from datetime import timedelta
 from functools import cached_property
 from typing import Annotated, Final, Literal, Self
@@ -5,6 +6,9 @@ from urllib.parse import unquote
 
 from psycopg import IsolationLevel
 from pydantic import (
+    HttpUrl,
+    NonNegativeInt,
+    PositiveInt,
     PostgresDsn,
     RedisDsn,
     SecretStr,
@@ -50,7 +54,33 @@ class ApiConfig(BaseSettings, PermissiveDTO):
     JWT_ALGORITHM: Literal["HS256", "HS384", "HS512"] = "HS256"
 
     JWT_ACCESS_LIFETIME: timedelta = timedelta(hours=3)
+    JWT_CHALLENGE_LIFETIME: timedelta = timedelta(minutes=5)
     JWT_REFRESH_LIFETIME: timedelta = timedelta(days=1)
+
+    TOTP_DIGITS: Literal[6, 8] = 6
+    TOTP_ISSUER: Annotated[
+        str,
+        StringConstraints(max_length=64, min_length=1),
+    ] = "api"
+
+    TOTP_LOCKOUT: timedelta = timedelta(minutes=15)
+    TOTP_MAX_FAILURES: PositiveInt = 5
+    TOTP_PERIOD: PositiveInt = 30
+    TOTP_RECOVERY_CODES: PositiveInt = 10
+    TOTP_TOLERANCE: NonNegativeInt = 1
+
+    DEFAULT_FROM_EMAIL: str = "no-reply@localhost"
+    EMAIL_BACKEND: str = "django.core.mail.backends.console.EmailBackend"
+    EMAIL_HOST: str = ""
+    EMAIL_HOST_PASSWORD: OptionalSecret = SecretStr(secret_value="")
+    EMAIL_HOST_USER: str = ""
+    EMAIL_PORT: PositiveInt = 587
+    EMAIL_USE_TLS: bool = True
+
+    EMAIL_VERIFICATION_LIFETIME: timedelta = timedelta(hours=24)
+    REQUIRE_EMAIL_VERIFICATION: bool = True
+
+    FRONTEND_URL: HttpUrl = HttpUrl(url="http://localhost:3000")
 
     DATABASE_URL: PostgresDsn
     REDIS_URL: RedisDsn
@@ -88,6 +118,46 @@ class ApiConfig(BaseSettings, PermissiveDTO):
         return self
 
     @model_validator(mode="after")
+    def check_email_delivery(self) -> Self:
+        if not self.DEPLOY:
+            return self
+
+        missing: Sequence[str] = tuple(
+            name
+            for name in ("DEFAULT_FROM_EMAIL", "EMAIL_HOST")
+            if not getattr(self, name)
+        )
+
+        if missing:
+            raise ValueError(
+                f"{', '.join(f'`{name}`' for name in missing)} "
+                "es obligatorio cuando `DEPLOY=True`.",
+            )
+
+        return self
+
+    @model_validator(mode="after")
+    def check_lifetimes(self) -> Self:
+        expired: Sequence[str] = tuple(
+            name
+            for name in (
+                "EMAIL_VERIFICATION_LIFETIME",
+                "JWT_ACCESS_LIFETIME",
+                "JWT_CHALLENGE_LIFETIME",
+                "JWT_REFRESH_LIFETIME",
+            )
+            if getattr(self, name) <= timedelta()
+        )
+
+        if expired:
+            raise ValueError(
+                f"{', '.join(f'`{name}`' for name in expired)} "
+                "debe ser una duración positiva.",
+            )
+
+        return self
+
+    @model_validator(mode="after")
     def check_redis_secret_key(self) -> Self:
         if (
             self.DEPLOY
@@ -116,6 +186,10 @@ class ApiConfig(BaseSettings, PermissiveDTO):
     @cached_property
     def csrf_header(self) -> str:
         return f"x-{self.csrf_cookie_name}"
+
+    @cached_property
+    def frontend_url(self) -> str:
+        return str(self.FRONTEND_URL).rstrip("/")
 
     @cached_property
     def pg_database(self) -> dict:

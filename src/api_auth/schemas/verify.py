@@ -1,5 +1,6 @@
 from api_auth.enums import TokenTypes
 from api_core.schemas.base import DTO, PermissiveDTO
+from api_core.schemas.get import LaxEnum
 
 from .types import JwtToken
 
@@ -8,7 +9,9 @@ from .types import JwtToken
 
 class MobileVerifyPost(DTO):
     token: JwtToken
-    type: TokenTypes
+
+    # a json body carries the member's value, never the member itself
+    type: LaxEnum[TokenTypes]
 
 
 ########################################################################################

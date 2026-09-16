@@ -57,6 +57,32 @@ def build_cookied_response(
 ########################################################################################
 
 
+def build_challenged_response(
+    *,
+    challenge: str,
+    ctrl: Controller,
+    data: DTO | None = None,
+) -> HttpResponse:
+    response: HttpResponse = build_response(
+        raw_data=data,
+        renderer=request_renderer(ctrl.request),
+        serializer=ctrl.serializer,
+        status_code=HTTPStatus.ACCEPTED,
+    )
+
+    set_jwt_cookie(
+        key=TokenTypes.CHALLENGE,
+        lifetime=CONFIG.JWT_CHALLENGE_LIFETIME,
+        response=response,
+        value=challenge,
+    )
+
+    return attach_csrf(response, ctrl.request)
+
+
+########################################################################################
+
+
 def build_cookieless_response(request: HttpRequest) -> HttpResponse:
     response: HttpResponse = build_response(
         raw_data=None,
@@ -66,6 +92,7 @@ def build_cookieless_response(request: HttpRequest) -> HttpResponse:
     )
 
     unset_jwt_cookie(TokenTypes.ACCESS, response)
+    unset_jwt_cookie(TokenTypes.CHALLENGE, response)
     unset_jwt_cookie(TokenTypes.REFRESH, response)
 
     return attach_csrf(response, request)

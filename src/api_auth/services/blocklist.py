@@ -4,7 +4,12 @@ from dmr.security.jwt.blocklist.models import BlocklistedJWToken
 
 from api_exceptions.errors import UnauthorizedError
 
-from .jwt import find_jwt_subject, jwt_revocation_expiry, jwt_revocation_key
+from .jwt import (
+    find_jwt_subject,
+    jwt_lookup_keys,
+    jwt_revocation_expiry,
+    jwt_revocation_key,
+)
 
 if TYPE_CHECKING:
     from collections.abc import Sequence
@@ -72,8 +77,10 @@ async def consume_jwt(token: JWToken, user: ApiUser | None = None) -> bool:
 
 
 async def ensure_active_jwts(tokens: Sequence[JWToken]) -> None:
+    # a token is also dead when its session was revoked as a whole,
+    # which is what logging out blocklists
     if await find_blocklisted_jtis(
-        frozenset(t.jti for t in tokens if t.jti is not None)
+        frozenset(key for token in tokens for key in jwt_lookup_keys(token)),
     ):
         raise UnauthorizedError(detail=REVOKED_DETAIL)
 

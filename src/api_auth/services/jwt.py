@@ -156,18 +156,34 @@ def jwt_session_key(token: JWToken) -> str | None:
 ########################################################################################
 
 
+def build_challenge_jwt(user: ApiUser) -> str:
+    return build_jwt(
+        lifetime=CONFIG.JWT_CHALLENGE_LIFETIME,
+        token_type=TokenTypes.CHALLENGE,
+        user=user,
+    )
+
+
+########################################################################################
+
+
 def build_jwt(
     *,
     lifetime: timedelta,
-    session: str,
+    session: str | None = None,
     token_type: str,
     user: ApiUser,
 ) -> str:
+    extras: dict[str, str] = {"type": token_type}
+
+    if session is not None:
+        extras["sid"] = session
+
     return JWToken(
         sub=str(user.pk),
         exp=datetime.now(tz=UTC) + lifetime,
         jti=uuid4().hex,
-        extras={"sid": session, "type": token_type},
+        extras=extras,
     ).encode(
         algorithm=CONFIG.JWT_ALGORITHM,
         secret=CONFIG.JWT_SECRET_KEY.get_secret_value(),

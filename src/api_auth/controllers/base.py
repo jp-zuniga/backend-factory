@@ -21,6 +21,16 @@ class AuthController[Serializer: BaseSerializer](
 ########################################################################################
 
 
+class PrivateAuthController[Serializer: BaseSerializer](
+    StrictThrottlingMixin,
+    BaseController[Serializer],
+):
+    pass
+
+
+########################################################################################
+
+
 class MobileAuthController[Serializer: BaseSerializer](AuthController[Serializer]):
     namespace: ClassVar[str] = "mobile"
     variant: ClassVar[str] = "Mobile"
