@@ -11,6 +11,62 @@
 
   nav = [
     { "Home" = "index.md" },
+    {
+      "Getting started" = [
+        "getting-started/index.md",
+        "getting-started/requirements.md",
+        "getting-started/installation.md",
+        "getting-started/layout.md",
+        "getting-started/commands.md",
+      ],
+    },
+    {
+      "Concepts" = [
+        "concepts/index.md",
+        "concepts/request-lifecycle.md",
+        "concepts/controllers.md",
+        "concepts/schemas.md",
+        "concepts/operations.md",
+        "concepts/models.md",
+        "concepts/database.md",
+        "concepts/routing.md",
+        "concepts/errors.md",
+        "concepts/openapi.md",
+        "concepts/decisions.md",
+      ],
+    },
+    {
+      "API" = [
+        "api/index.md",
+        "api/conventions.md",
+        "api/authentication.md",
+        "api/sessions.md",
+        "api/email-confirmation.md",
+        "api/two-factor.md",
+        "api/users.md",
+        "api/errors.md",
+      ],
+    },
+    {
+      "Guides" = [
+        "guides/index.md",
+        "guides/new-resource.md",
+        "guides/sub-resources.md",
+        "guides/base-models.md",
+        "guides/permissions.md",
+        "guides/seeding.md",
+        "guides/email.md",
+        "guides/testing.md",
+        "guides/deployment.md",
+      ],
+    },
+    {
+      "Reference" = [
+        "reference/index.md",
+        "reference/configuration.md",
+        "reference/catalog.md",
+      ],
+    },
   ]
 
   [project.markdown_extensions]
