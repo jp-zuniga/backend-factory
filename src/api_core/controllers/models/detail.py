@@ -74,6 +74,73 @@ class ModelDetailController[
 ########################################################################################
 
 
+class ModelReadOnlyDetailController[
+    Serializer: BaseSerializer,
+    Model: DatabaseModel,
+    Get: DTO,
+    PathSchema: InstancePath = UuidInstancePath,
+](ModelController[Serializer, Model, Get]):
+    """
+    Expose a single row that clients may read but never write.
+    """
+
+    retrieve_operation: ClassVar[type[RetrieveOperation]] = FlatRetrieveOperation
+
+    async def get(self, parsed_path: Path[PathSchema]) -> Get:
+        return await self.build_operation(self.retrieve_operation).run(parsed_path)
+
+
+########################################################################################
+
+
+class ModelReadUpdateDetailController[
+    Serializer: BaseSerializer,
+    Model: DatabaseModel,
+    Get: DTO,
+    Put: DTO,
+    Patch: DTO,
+    PathSchema: InstancePath = UuidInstancePath,
+](ModelController[Serializer, Model, Get]):
+    """
+    Expose a single row that clients may read and edit, but never delete.
+    """
+
+    retrieve_operation: ClassVar[type[RetrieveOperation]] = FlatRetrieveOperation
+    update_operation: ClassVar[type[UpdateOperation]] = FlatUpdateOperation
+
+    async def get(self, parsed_path: Path[PathSchema]) -> Get:
+        return await self.build_operation(self.retrieve_operation).run(parsed_path)
+
+    async def put(
+        self,
+        parsed_body: Body[Put],
+        parsed_path: Path[PathSchema],
+    ) -> Get:
+        return await self.build_operation(
+            self.update_operation,
+            partial=False,
+        ).run(
+            body=parsed_body,
+            path=parsed_path,
+        )
+
+    async def patch(
+        self,
+        parsed_body: Body[Patch],
+        parsed_path: Path[PathSchema],
+    ) -> Get:
+        return await self.build_operation(
+            self.update_operation,
+            partial=True,
+        ).run(
+            body=parsed_body,
+            path=parsed_path,
+        )
+
+
+########################################################################################
+
+
 class ModelNestedDetailController[
     Serializer: BaseSerializer,
     Model: DatabaseModel,

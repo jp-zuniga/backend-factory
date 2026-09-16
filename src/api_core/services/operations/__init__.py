@@ -8,7 +8,14 @@ from .base import (
     UpdateOperation,
     split_payload,
 )
-from .flat import FlatCreateOperation, FlatRetrieveOperation, FlatUpdateOperation
+from .flat import (
+    FlatCreateOperation,
+    FlatDestroyOperation,
+    FlatRetrieveOperation,
+    FlatUpdateOperation,
+    ForeignKeyCreateOperation,
+    ForeignKeyUpdateOperation,
+)
 from .link import (
     FlatLinkAttachOperation,
     FlatLinkDetachOperation,
@@ -24,6 +31,7 @@ from .m2m import (
     ManyToManyUpdateOperation,
 )
 from .nested import NestedCreateOperation, NestedOperation, NestedUpdateOperation
+from .scoped import ScopedCreateOperation
 
 if TYPE_CHECKING:
     from collections.abc import Sequence
@@ -32,11 +40,14 @@ __all__: Sequence[str] = (
     "CreateOperation",
     "DestroyOperation",
     "FlatCreateOperation",
+    "FlatDestroyOperation",
     "FlatLinkAttachOperation",
     "FlatLinkDetachOperation",
     "FlatLinkInspectOperation",
     "FlatRetrieveOperation",
     "FlatUpdateOperation",
+    "ForeignKeyCreateOperation",
+    "ForeignKeyUpdateOperation",
     "LinkAttachOperation",
     "LinkDetachOperation",
     "LinkInspectOperation",
@@ -49,6 +60,7 @@ __all__: Sequence[str] = (
     "NestedOperation",
     "NestedUpdateOperation",
     "RetrieveOperation",
+    "ScopedCreateOperation",
     "UpdateOperation",
     "split_payload",
 )

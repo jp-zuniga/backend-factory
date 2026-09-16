@@ -212,6 +212,54 @@ def collect_nested_relations(model: type[DatabaseModel]) -> frozenset[str]:
 
 
 @cache
+def collect_fk_attnames(model: type[DatabaseModel]) -> dict[str, str]:
+    """
+    Map every foreign key's field name to the column it writes.
+
+    Args:
+        model: The model to inspect.
+
+    Returns:
+        Pairs of `("parent", "parent_id")`, one per concrete relation.
+
+    """
+
+    return {
+        str(field.name): str(field.attname)
+        for field in model._meta.concrete_fields
+        if field.is_relation
+    }
+
+
+########################################################################################
+
+
+def resolve_fk_attnames(data: dict, model: type[DatabaseModel]) -> dict:
+    """
+    Rewrite a payload so that foreign keys are assigned by id.
+
+    A schema names a relation the way the API exposes it (`parent`),
+    while a bare `QuerySet.create()` or `update()` call needs the
+    column behind it (`parent_id`) to accept a raw key.
+
+    Args:
+        data: The payload dumped from a schema.
+        model: The model the payload is written to.
+
+    Returns:
+        The same payload, keyed by column names.
+
+    """
+
+    attnames: dict[str, str] = collect_fk_attnames(model)
+
+    return {attnames.get(name, name): value for name, value in data.items()}
+
+
+########################################################################################
+
+
+@cache
 def collect_unique_fields(model: type[DatabaseModel]) -> frozenset[str]:
     return frozenset(
         str(field.name)
