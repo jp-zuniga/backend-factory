@@ -48,14 +48,6 @@ check-dep cmd pretty="":
     fi
 
 [private]
-check-docker:
-    @just check-dep docker
-
-[private]
-check-uv:
-    @just check-dep uv
-
-[private]
 pre-commit $DEBUG="False":
     @just lint --fix
     @just fmt
@@ -64,8 +56,17 @@ pre-commit $DEBUG="False":
     @just test
 
 [private]
-run-frozen *cmd: check-uv
+run-frozen *cmd: (check-dep "uv")
     uv run --frozen {{ cmd }}
+
+[private]
+services: (check-dep "docker")
+    #!/usr/bin/env bash
+    set -euo pipefail
+
+    if [ -z "$(docker compose ps -q)" ]; then
+      docker compose up --detach --wait postgres redis
+    fi
 
 ########################################################################################
 
@@ -106,7 +107,7 @@ repl *args="":
     @just run-frozen python {{ args }}
 
 [group("uv")]
-sync: check-uv
+sync: (check-dep "uv")
     uv sync --frozen
 
 [group("uv")]
@@ -116,37 +117,6 @@ test *args="": services
 [group("uv")]
 zen:
     @just run-frozen zensical serve
-
-########################################################################################
-
-[group("docker")]
-build profile="dev": check-docker
-    #!/usr/bin/env bash
-    set -euo pipefail
-
-    SERVICE="api-{{ profile }}"
-
-    docker compose --profile {{ profile }} build  }}
-
-[group("docker")]
-services: check-docker
-    #!/usr/bin/env bash
-    set -euo pipefail
-
-    if [ -z "$(docker compose ps -q)" ]; then
-      docker compose up --detach --wait postgres redis
-    fi
-
-[group("docker")]
-up profile="dev": check-docker
-    #!/usr/bin/env bash
-    set -euo pipefail
-
-    SERVICE="api-{{ profile }}"
-
-    docker compose --profile {{ profile }} build "$SERVICE"
-    docker compose --profile {{ profile }} run --rm migrate
-    docker compose --profile {{ profile }} up --detach --wait "$SERVICE"
 
 ########################################################################################
 
@@ -255,11 +225,9 @@ validate *args="": services
 
 [group("api")]
 [private]
-api-action target method endpoint args data:
+api-action target method endpoint args data: (check-dep "jq")
     #!/usr/bin/env bash
     set -euo pipefail
-
-    just check-dep jq
 
     TOKEN=$(just get-token {{ target }})
 
@@ -284,11 +252,9 @@ api-action target method endpoint args data:
 
 [group("api")]
 [private]
-get-token target:
+get-token target: (check-dep "jq")
     #!/usr/bin/env bash
     set -euo pipefail
-
-    just check-dep jq
 
     if [ "{{ target }}" == "local" ]; then
       BASE="{{ django_local }}"
