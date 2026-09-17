@@ -29,7 +29,9 @@ def schemathesis_schema(openapi_document: dict) -> schemathesis.BaseSchema:
     config = SchemathesisConfig(
         projects=ProjectsConfig(
             default=ProjectConfig(
-                generation=GenerationConfig(modes=[GenerationMode.POSITIVE]),
+                generation=GenerationConfig(
+                    modes=[GenerationMode.POSITIVE, GenerationMode.NEGATIVE],
+                ),
             ),
         ),
     )

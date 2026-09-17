@@ -89,7 +89,8 @@ def test_apply_filterset_uses_unaccented_search(
 
 
 def test_apply_filterset_filters_by_group(
-    user_qs: QuerySet, seeded_groups: dict[str, Group]
+    user_qs: QuerySet,
+    seeded_groups: dict[str, Group],
 ) -> None:
     user: ApiUser = ApiUser.objects.create_user(
         username="con-grupo",
@@ -109,7 +110,8 @@ def test_apply_filterset_filters_by_group(
 
 
 def test_apply_filterset_applies_ordering(
-    user_qs: QuerySet, seeded_groups: dict[str, Group]
+    user_qs: QuerySet,
+    seeded_groups: dict[str, Group],
 ) -> None:
     build_users(3, prefix="orden")
 
@@ -117,7 +119,7 @@ def test_apply_filterset_applies_ordering(
         apply_filterset,
         data={"order": "-username"},
         filterset=ApiUserFilterSet,
-        qs=user_qs,
+        qs=user_qs.filter(username__startswith="orden"),
     )
 
     assert [user.username for user in filtered] == [
