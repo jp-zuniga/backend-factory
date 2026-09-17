@@ -29,6 +29,10 @@
           unstable.railway
           unstable.uv
         ];
+
+        shellHook = ''
+          export SSL_CERT_FILE=/etc/ssl/certs/ca-bundle.crt
+        '';
       };
     });
   };
