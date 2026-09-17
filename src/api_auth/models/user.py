@@ -44,7 +44,7 @@ if TYPE_CHECKING:
 class ApiUser(ApiSoftDeleteModel, AbstractBaseUser, PermissionsMixin):
     first_name = CharField(db_default="", default="", max_length=100)
     last_name = CharField(db_default="", default="", max_length=100)
-    email = EmailField(db_default="", default="")
+    email = EmailField()
     username = CharField(max_length=100)
     password = CharField(max_length=128)
 
@@ -77,7 +77,7 @@ class ApiUser(ApiSoftDeleteModel, AbstractBaseUser, PermissionsMixin):
         constraints: Sequence[UniqueConstraint] = (
             UniqueConstraint(
                 Lower("email"),
-                condition=Q(email__len__gt=0, is_active=True),
+                condition=Q(is_active=True),
                 name="unq_%(class)s_email",
             ),
             UniqueConstraint(

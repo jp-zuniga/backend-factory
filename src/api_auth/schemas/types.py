@@ -3,19 +3,11 @@ from typing import Annotated
 from pydantic import AfterValidator, StringConstraints
 
 from api_auth.models import ApiUser
-from api_core.schemas.validators import empty_or_email
 
 ########################################################################################
 
 type Email = Annotated[
     str,
-    AfterValidator(func=empty_or_email),
-    AfterValidator(func=ApiUser.objects.normalize_email),
-    StringConstraints(max_length=254),
-]
-
-type RequiredEmail = Annotated[
-    Email,
     AfterValidator(func=ApiUser.objects.normalize_email),
     StringConstraints(max_length=254, min_length=1),
 ]

@@ -11,7 +11,6 @@ from api_core.schemas.validators import (
     coerce_date,
     coerce_datetime,
     coerce_uuid,
-    empty_or_email,
     empty_or_url,
 )
 
@@ -69,24 +68,6 @@ def test_coerce_uuid_passes_through_unparseable_strings() -> None:
 
 def test_coerce_uuid_ignores_non_strings() -> None:
     assert coerce_uuid(None) is None
-
-
-########################################################################################
-
-
-def test_empty_or_email_accepts_the_empty_string() -> None:
-    assert empty_or_email("") == ""  # ruff: ignore[compare-to-empty-string]
-
-
-def test_empty_or_email_accepts_a_valid_address() -> None:
-    assert empty_or_email("persona@unit.example.com") == "persona@unit.example.com"
-
-
-def test_empty_or_email_rejects_an_invalid_address() -> None:
-    with pytest.raises(PydanticCustomError) as raised:
-        empty_or_email("no-es-un-correo")
-
-    assert raised.value.context["msg"] == "Debe ser un correo válido."  # ty: ignore[not-subscriptable]
 
 
 ########################################################################################

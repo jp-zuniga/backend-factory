@@ -3,7 +3,6 @@ from typing import Final
 from uuid import UUID
 
 from pydantic import (
-    EmailStr,
     HttpUrl,
     TypeAdapter,
     ValidationError as PydanticValidationError,
@@ -14,7 +13,6 @@ from pydantic_core import PydanticCustomError
 
 DATE_ADAPTER: Final[TypeAdapter[date]] = TypeAdapter(date)
 DATETIME_ADAPTER: Final[TypeAdapter[datetime]] = TypeAdapter(datetime)
-EMAIL_ADAPTER: Final[TypeAdapter[EmailStr]] = TypeAdapter(EmailStr)
 URL_ADAPTER: Final[TypeAdapter[HttpUrl]] = TypeAdapter(HttpUrl)
 
 ########################################################################################
@@ -92,23 +90,6 @@ def coerce_uuid(value: object) -> object:
         return UUID(value)
     except ValueError:
         return value
-
-
-########################################################################################
-
-
-def empty_or_email(value: str) -> str:
-    if value:
-        try:
-            EMAIL_ADAPTER.validate_python(value)
-        except PydanticValidationError as p:
-            raise PydanticCustomError(
-                "api_custom",
-                "",
-                {"msg": "Debe ser un correo válido."},
-            ) from p
-
-    return value
 
 
 ########################################################################################

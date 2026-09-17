@@ -63,8 +63,7 @@ class ApiUserGet(ApiUserGroupsGet, ApiUserPermissionsGet, ApiUserInlineGet):
 class ApiUserBaseWrite(DTO):
     first_name: Annotated[str, StringConstraints(max_length=100)] = ""
     last_name: Annotated[str, StringConstraints(max_length=100)] = ""
-    email: Email = ""
-
+    email: Email
     username: Annotated[Username, AfterValidator(func=ApiUser.normalize_username)]
 
 

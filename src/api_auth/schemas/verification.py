@@ -1,6 +1,6 @@
 from api_core.schemas.base import DTO
 
-from .types import RequiredEmail, VerificationToken
+from .types import Email, VerificationToken
 
 ########################################################################################
 
@@ -13,4 +13,4 @@ class EmailConfirmPost(DTO):
 
 
 class EmailResendPost(DTO):
-    email: RequiredEmail
+    email: Email
