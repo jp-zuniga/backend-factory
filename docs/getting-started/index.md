@@ -11,7 +11,7 @@ for browsers, bearer tokens for mobile), users, groups and permissions, an
 append-only audit trail, and a generated OpenAPI schema — all wired up and
 tested.
 
-What it deliberately does not have is *your* domain. `api_auth` exists to be
+What it deliberately does not have is _your_ domain. `api_auth` exists to be
 read, not extended: it is the reference implementation of every convention
 described under [Concepts](../concepts/index.md), so that the app you write
 next — `api_billing`, `api_inventory`, whatever it turns out to be — can copy

@@ -13,13 +13,13 @@ the triggers themselves work, and
 
 ## The four (plus the root)
 
-| Base | Adds | A row may be | Deleted by a client means |
-|---|---|---|---|
-| `ApiModel` | `id` (uuid7, immutable) | inserted, updated, deleted | a real `DELETE` |
-| `ApiTimestampedModel` | `created_at`, `updated_at` (trigger-maintained) | inserted, updated, deleted | a real `DELETE` |
-| `ApiAppendOnlyModel` | — (drops `updated_at`) | inserted only | never — the trigger rejects it |
-| `ApiProtectedModel` | — | inserted, updated | never — the trigger rejects it |
-| `ApiSoftDeleteModel` | `is_active` (trigger-maintained on delete) | inserted, updated, deleted | `is_active = False`, row survives |
+| Base                  | Adds                                            | A row may be               | Deleted by a client means         |
+| --------------------- | ----------------------------------------------- | -------------------------- | --------------------------------- |
+| `ApiModel`            | `id` (uuid7, immutable)                         | inserted, updated, deleted | a real `DELETE`                   |
+| `ApiTimestampedModel` | `created_at`, `updated_at` (trigger-maintained) | inserted, updated, deleted | a real `DELETE`                   |
+| `ApiAppendOnlyModel`  | — (drops `updated_at`)                          | inserted only              | never — the trigger rejects it    |
+| `ApiProtectedModel`   | —                                               | inserted, updated          | never — the trigger rejects it    |
+| `ApiSoftDeleteModel`  | `is_active` (trigger-maintained on delete)      | inserted, updated, deleted | `is_active = False`, row survives |
 
 ### `ApiModel`
 
@@ -58,7 +58,7 @@ without a second index.
 
 Drops `updated_at` (there is nothing to update) and adds one trigger:
 `Protect(operation=(Delete | Update))`, name `trg_append_only`. A row, once
-inserted, cannot be changed or removed by *anything* — application code,
+inserted, cannot be changed or removed by _anything_ — application code,
 a bug, or an operator with a `psql` shell. Used for rows that are a record
 of something having happened, not a piece of current state.
 
@@ -87,7 +87,7 @@ The base a model uses is only half of the guarantee — the other half is
 which controller sits in front of it. A base that raises `Protect` on
 `DELETE` still lets a client's `DELETE /resource/{id}/` request reach the
 database and fail as a trigger error (a `500`, since nothing in the request
-path expected it) unless the *controller* itself does not expose a `destroy`
+path expected it) unless the _controller_ itself does not expose a `destroy`
 endpoint in the first place. Pick the controller family
 ([Controllers](controllers.md)) that matches the base up front, so an
 unsupported method comes back as a clean `405` — this pairing is spelled out

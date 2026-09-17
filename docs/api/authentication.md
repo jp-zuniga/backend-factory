@@ -77,10 +77,10 @@ though the access token's own expiry hasn't passed yet.
 
 ## What every authenticated request needs
 
-| Flavour | Requirement |
-| --- | --- |
-| Web | `access` cookie present; `x-csrftoken` header on unsafe methods |
-| Mobile | `Authorization: Bearer <access>` header |
+| Flavour | Requirement                                                     |
+| ------- | --------------------------------------------------------------- |
+| Web     | `access` cookie present; `x-csrftoken` header on unsafe methods |
+| Mobile  | `Authorization: Bearer <access>` header                         |
 
 A missing or invalid credential answers `401`; see
 [API → Errors](errors.md) for the response shape.

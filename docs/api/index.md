@@ -5,7 +5,7 @@ icon: lucide/network
 # API
 
 This section documents the HTTP surface the template ships with, for whoever is
-*consuming* it — a frontend, a mobile app, or a script. If you are extending the
+_consuming_ it — a frontend, a mobile app, or a script. If you are extending the
 template instead, see [Concepts](../concepts/index.md) and [Guides](../guides/index.md).
 
 ## Base url and content types
@@ -32,13 +32,13 @@ session. Full detail, including cookie names and lifetimes, is on the
 
 ## What ships in the box
 
-| Group | Endpoints |
-| --- | --- |
-| Sessions | log in, refresh, verify, log out (web and mobile variants of each) |
-| Email confirmation | register, confirm, resend |
-| Two-factor | status, enroll, confirm, recover, disable, and the login-time challenge |
-| Users | profile, staff-managed user list/detail, group and permission assignment |
-| Groups & permissions | read/write groups, read-only permissions |
+| Group                | Endpoints                                                                |
+| -------------------- | ------------------------------------------------------------------------ |
+| Sessions             | log in, refresh, verify, log out (web and mobile variants of each)       |
+| Email confirmation   | register, confirm, resend                                                |
+| Two-factor           | status, enroll, confirm, recover, disable, and the login-time challenge  |
+| Users                | profile, staff-managed user list/detail, group and permission assignment |
+| Groups & permissions | read/write groups, read-only permissions                                 |
 
 See [Sessions](sessions.md), [Email confirmation](email-confirmation.md),
 [Two-factor authentication](two-factor.md) and [Users and permissions](users.md)

@@ -83,14 +83,15 @@
     }
 
     [project.markdown_extensions.pymdownx]
+      caret     = {}
+      details   = {}
+      emoji     = {}
+      highlight = {}
+      keys      = {}
+      mark      = {}
+      tilde     = {}
+
       blocks.caption = {}
-      caret          = {}
-      details        = {}
-      emoji          = {}
-      highlight      = {}
-      keys           = {}
-      mark           = {}
-      tilde          = {}
 
       tasklist.custom_checkbox = true
 
@@ -115,6 +116,9 @@
           object    = "pymdownx.slugs.slugify",
         }
 
+    [project.markdown_extensions.zensical.extensions]
+      preview.configurations.targets.include = ["**/*.md"]
+
   [project.theme]
     features = [
       "content.code.copy",
@@ -135,20 +139,20 @@
       media       = "(prefers-color-scheme: light)"
       scheme      = "default"
       toggle.icon = "lucide/sun"
-      toggle.name = "Go to dark mode!"
+      toggle.name = "Go to dark mode"
 
     [[project.theme.palette]]
       media       = "(prefers-color-scheme: dark)"
       scheme      = "slate"
       toggle.icon = "lucide/moon"
-      toggle.name = "Go to light mode!"
+      toggle.name = "Go to light mode"
 
   [project.validation]
-    invalid_link_anchors  = false
-    invalid_links         = false
-    shadowed_definitions  = false
-    shadowed_footnotes    = false
-    unresolved_footnotes  = false
+    invalid_link_anchors  = true
+    invalid_links         = true
+    shadowed_definitions  = true
+    shadowed_footnotes    = true
+    unresolved_footnotes  = true
     unresolved_references = false
     unused_definitions    = false
-    unused_footnotes      = false
+    unused_footnotes      = true

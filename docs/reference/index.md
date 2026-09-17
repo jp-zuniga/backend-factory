@@ -14,7 +14,7 @@ url, not prose you read start to finish.
   controllers, operations, base models, schema helpers, and every endpoint
   with its url name.
 
-What is *not* here is explanation. If you want to know **why** the
+What is _not_ here is explanation. If you want to know **why** the
 configuration is shaped the way it is, or **how** a controller resolves its
 generics into a working endpoint, that lives under [Concepts](../concepts/index.md).
 If you want a worked example of using any of this to add something new, that

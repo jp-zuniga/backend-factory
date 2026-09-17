@@ -8,7 +8,7 @@ Every error this API returns — a bad body, a permission failure, a database
 constraint refusing a write — ends up as the same shape:
 `{"detail": str, "field_errors": {str: str} | null}`. `api_exceptions` is the
 one place that owns both halves of that: the hierarchy of typed errors, and
-the single handler that turns *any* exception into one of them.
+the single handler that turns _any_ exception into one of them.
 
 ## `ApiError` and its subtypes
 
@@ -21,24 +21,24 @@ class ApiError(Exception):
     default_http_status: HTTPStatus = HTTPStatus.INTERNAL_SERVER_ERROR
 ```
 
-| Error | Status | Raised for |
-| --- | --- | --- |
-| `BadRequestError` | `400` | body/query/path/header validation failures |
-| `UnauthorizedError` | `401` | missing or rejected credentials |
-| `ForbiddenError` | `403` | authenticated, but lacking the permission |
-| `NotFoundError` | `404` | a lookup that matched no row |
-| `ConflictError` | `409` | a constraint or trigger refusing a write |
-| `UnacceptableHeaderError` | `406` | an `Accept` header this API can't satisfy |
-| `UnsupportedMediaError` | `415` (or remapped to `400`) | a body this API can't parse |
-| `ContentTooLargeError` | `413` | a body/field/file count over the limit |
-| `ThrottleExceededError` | `429` | a throttle tripped |
+| Error                     | Status                       | Raised for                                 |
+| ------------------------- | ---------------------------- | ------------------------------------------ |
+| `BadRequestError`         | `400`                        | body/query/path/header validation failures |
+| `UnauthorizedError`       | `401`                        | missing or rejected credentials            |
+| `ForbiddenError`          | `403`                        | authenticated, but lacking the permission  |
+| `NotFoundError`           | `404`                        | a lookup that matched no row               |
+| `ConflictError`           | `409`                        | a constraint or trigger refusing a write   |
+| `UnacceptableHeaderError` | `406`                        | an `Accept` header this API can't satisfy  |
+| `UnsupportedMediaError`   | `415` (or remapped to `400`) | a body this API can't parse                |
+| `ContentTooLargeError`    | `413`                        | a body/field/file count over the limit     |
+| `ThrottleExceededError`   | `429`                        | a throttle tripped                         |
 
 `BadRequestError`, `ConflictError`, `ContentTooLargeError` and
 `UnsupportedMediaError` are `TypedApiError[T]` subclasses — each pairs with a
 `StrEnum` of specific reasons (`ConflictErrorTypes.UNIQUE`,
 `BadRequestErrorTypes.MISSING_FIELDS`, ...) declared in `api_exceptions.enums`.
 When a `type=` is passed and no explicit `detail`, the enum's own value
-*is* the detail message — the enum exists so the space of possible messages
+_is_ the detail message — the enum exists so the space of possible messages
 for a given status code is closed and grep-able, not just free text.
 
 ## Request scopes
@@ -91,7 +91,7 @@ are the two adapters that turn a lower-level exception into a typed `ApiError`:
 `api_exceptions.handler.exc_handler` is registered once, globally, as
 `Settings.global_error_handler` (`api_core/settings.py`) — see
 [Request lifecycle](request-lifecycle.md#where-errors-become-payloads). It is
-the *only* function that knows how to turn a raw exception into an
+the _only_ function that knows how to turn a raw exception into an
 `ApiErrorResponse`:
 
 ```python
@@ -124,7 +124,7 @@ one in the logs, not get silently flattened into a generic error body.
 ## Adding a new error type
 
 Because `exc_handler` matches on Python types, adding an error that maps to
-an *existing* condition (say, another kind of `psycopg` violation) means
+an _existing_ condition (say, another kind of `psycopg` violation) means
 teaching the relevant `from_*` classmethod a new branch — the handler itself
 never changes. Adding an entirely new failure mode means:
 

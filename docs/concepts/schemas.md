@@ -6,7 +6,7 @@ icon: lucide/ruler
 
 Every request and response shape in this template is a
 [Pydantic](https://docs.pydantic.dev/) model rooted in `api_core.schemas.base.DTO`. Two things follow from that: the
-shapes are declarative (a controller's type parameters *are* its contract), and
+shapes are declarative (a controller's type parameters _are_ its contract), and
 they are strict by default — a schema rejects what it does not recognise rather
 than silently dropping it.
 
@@ -92,7 +92,7 @@ class ApiUserGet(ApiUserGroupsGet, ApiUserPermissionsGet, ApiUserInlineGet):
     pass
 ```
 
-`ApiUserInlineGet` is what a *related* object embeds — the fields of a user
+`ApiUserInlineGet` is what a _related_ object embeds — the fields of a user
 another schema nests, with no relations of its own. `ApiUserGet` is what the
 user's own detail endpoint returns, adding the nested `groups` and
 `permissions`. The nesting is not free: `api_core.services.relations`
@@ -109,7 +109,7 @@ unless the depth is deliberate.
 ## Write schemas and the `build_put_schema` / `build_patch_schema` factories
 
 A resource is hand-written as a `Post` (or `Write`) schema — the shape a
-`201 Created` accepts — and `PUT`/`PATCH` are *derived* from it rather than
+`201 Created` accepts — and `PUT`/`PATCH` are _derived_ from it rather than
 written by hand:
 
 ```python
@@ -123,7 +123,9 @@ def build_put_schema[Post: type[DTO]](dto: Post) -> Post:
 def build_patch_schema[Put: type[DTO]](dto: Put) -> Put:
     kwargs = {"__base__": dto} | {
         name: (
-            field.annotation if not field.metadata else Annotated[field.annotation, *field.metadata],
+            field.annotation
+            if not field.metadata
+            else Annotated[field.annotation, *field.metadata],
             None,
         )
         for name, field in dto.model_fields.items()
@@ -147,6 +149,7 @@ class GroupPost(DTO):
     name: Annotated[str, StringConstraints(max_length=150, min_length=1)]
     permissions: list[PositiveInt] | None = None
 
+
 GroupPut = build_put_schema(GroupPost)
 GroupPatch = build_patch_schema(GroupPut)
 ```
@@ -157,7 +160,7 @@ Three classes, one written by hand.
 
 A strict `DTO` does not coerce anything Pydantic wouldn't coerce on its own,
 which means a handful of small, purpose-built pieces exist to keep validation
-strict *and* forgiving of how a client actually sends data:
+strict _and_ forgiving of how a client actually sends data:
 
 - `api_core.schemas.validators` defines `coerce_date`, `coerce_datetime` and
   `coerce_uuid` — each takes whatever the client sent, and if it is a string,
@@ -197,7 +200,9 @@ parameters, on top of `BaseGet`:
 type InstancePath = IntInstancePath | UuidInstancePath
 
 
-class RelatedPath[PK: PrimaryKey = UUID, RelatedPK: PrimaryKey = PositiveInt](BaseGet[PK]):
+class RelatedPath[PK: PrimaryKey = UUID, RelatedPK: PrimaryKey = PositiveInt](
+    BaseGet[PK]
+):
     related: RelatedPK
 ```
 
@@ -227,7 +232,7 @@ def build_scoped_path(
     )
 ```
 
-It reads the *actual* Django field behind `parent_field` to decide whether the
+It reads the _actual_ Django field behind `parent_field` to decide whether the
 parent's key parses as a `UUID` or a `PositiveInt`, and names the generated
 class after the model and the relation (`CommentPostPath`, for a `Comment`
 scoped under `post`). See [Sub-resources](../guides/sub-resources.md) for the

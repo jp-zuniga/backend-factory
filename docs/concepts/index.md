@@ -17,12 +17,12 @@ resource costs a handful of declarations instead of a hand-rolled view.
 Every endpoint in this template is built from the same four layers, each with
 its own page in this section:
 
-| Layer | Answers | Page |
-| --- | --- | --- |
+| Layer      | Answers                                   | Page                          |
+| ---------- | ----------------------------------------- | ----------------------------- |
 | Controller | Which url, which methods, who may call it | [Controllers](controllers.md) |
-| Schema | What shape a request and response take | [Schemas](schemas.md) |
-| Operation | What actually reads or writes rows | [Operations](operations.md) |
-| Model | What the database itself refuses to allow | [Models](models.md) |
+| Schema     | What shape a request and response take    | [Schemas](schemas.md)         |
+| Operation  | What actually reads or writes rows        | [Operations](operations.md)   |
+| Model      | What the database itself refuses to allow | [Models](models.md)           |
 
 A request moves down this table — controller to schema to operation to model —
 and the response carries the same shape back up. [Request lifecycle](request-lifecycle.md)

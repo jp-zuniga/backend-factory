@@ -65,7 +65,7 @@ An unknown, expired, or already-spent token answers `400`:
 ```json title="400 Bad Request"
 {
   "detail": "Uno o más campos no se pudieron validar.",
-  "field_errors": {"body.token": "El enlace no es válido o ya expiró."}
+  "field_errors": { "body.token": "El enlace no es válido o ya expiró." }
 }
 ```
 

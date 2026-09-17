@@ -43,7 +43,7 @@ POST /auth/two-factor-setup/
 Feed the `uri` to an authenticator app (as a QR code or by hand) — it
 carries the same secret, issuer and period the API will check codes
 against. Enrolling again before confirming just replaces the pending
-secret; enrolling on an account that already has a *confirmed* device
+secret; enrolling on an account that already has a _confirmed_ device
 answers `409`.
 
 ## Confirming
@@ -60,13 +60,13 @@ On success, answers `201` with a fresh batch of recovery codes — shown once,
 never retrievable again:
 
 ```json title="201 Created"
-{"codes": ["ABCD-1234", "EFGH-5678", "..."]}
+{ "codes": ["ABCD-1234", "EFGH-5678", "..."] }
 ```
 
 ## Recovery codes
 
 Ten single-use codes are issued at confirmation time, and the same call that
-confirms enrollment or rotates codes always returns the *entire new batch* —
+confirms enrollment or rotates codes always returns the _entire new batch_ —
 old unused codes are invalidated the moment a new batch is issued.
 
 ```http
@@ -93,7 +93,7 @@ Content-Type: application/json
 ```
 
 ```json title="200 OK"
-{"access": "…", "refresh": "…", "user": {"...": "..."}}
+{ "access": "…", "refresh": "…", "user": { "...": "..." } }
 ```
 
 The `code` may be a TOTP code or an unused recovery code — both are accepted
@@ -118,7 +118,7 @@ Content-Type: application/json
 {"code": "123456", "password": "hunter2"}
 ```
 
-Requires both the account's current password *and* a valid second-factor
+Requires both the account's current password _and_ a valid second-factor
 code — either alone is not enough to turn protection off. Answers `204` and
 removes the device and its recovery codes entirely; re-enabling later starts
 enrollment from scratch.

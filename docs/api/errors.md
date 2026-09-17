@@ -28,18 +28,18 @@ Every error response, regardless of status code, is the same shape:
   a specific endpoint's docs say otherwise.
 - **`field_errors`** — present only when the failure can be pinned to
   specific fields; `null`/absent otherwise. Keys are dotted paths that name
-  *which part of the request* the field lives in, then the field itself.
+  _which part of the request_ the field lives in, then the field itself.
 
 ## Where a field error points
 
-| Prefix | Part of the request |
-| --- | --- |
-| `body.*` | JSON request body |
-| `query.*` | Query string |
-| `path.*` | URL path parameters |
-| `cookies.*` | Cookies |
-| `headers.*` | Request headers |
-| `files.*` | Uploaded files |
+| Prefix      | Part of the request |
+| ----------- | ------------------- |
+| `body.*`    | JSON request body   |
+| `query.*`   | Query string        |
+| `path.*`    | URL path parameters |
+| `cookies.*` | Cookies             |
+| `headers.*` | Request headers     |
+| `files.*`   | Uploaded files      |
 
 So `"body.username": "Este campo es requerido."` means the `username` field
 of the JSON body was missing; `"cookies.csrftoken": "..."` means the problem
@@ -48,19 +48,19 @@ request.
 
 ## Status codes
 
-| Status | When | Retry? |
-| --- | --- | --- |
-| `400` Bad Request | Body/query/path failed validation | Yes, after fixing the request |
-| `401` Unauthorized | Missing, invalid, expired, or revoked credentials | Only after re-authenticating |
-| `403` Forbidden | Authenticated, but not permitted; or CSRF failed; or email unconfirmed | No, unless the underlying condition changes |
-| `404` Not Found | No matching row (or a foreign key pointed at one that doesn't exist) | No |
-| `405` Method Not Allowed | The controller doesn't expose that verb | No |
-| `406` Not Acceptable | Invalid `Accept` header | Yes, with a valid header |
-| `409` Conflict | Uniqueness/foreign-key/check constraint, or a locked row | Depends — a duplicate needs different data, a lock may resolve on retry |
-| `413` Content Too Large | Body/fields/files exceed limits | No, unless the request shrinks |
-| `415` Unsupported Media Type | Body couldn't be parsed at all (bad encoding, wrong content type) | Yes, with a fixed request |
-| `429` Too Many Requests | Rate limit exceeded | Yes, after `Retry-After` seconds |
-| `500` Internal Server Error | Unhandled failure | Not meaningfully — treat as a bug to report |
+| Status                       | When                                                                   | Retry?                                                                  |
+| ---------------------------- | ---------------------------------------------------------------------- | ----------------------------------------------------------------------- |
+| `400` Bad Request            | Body/query/path failed validation                                      | Yes, after fixing the request                                           |
+| `401` Unauthorized           | Missing, invalid, expired, or revoked credentials                      | Only after re-authenticating                                            |
+| `403` Forbidden              | Authenticated, but not permitted; or CSRF failed; or email unconfirmed | No, unless the underlying condition changes                             |
+| `404` Not Found              | No matching row (or a foreign key pointed at one that doesn't exist)   | No                                                                      |
+| `405` Method Not Allowed     | The controller doesn't expose that verb                                | No                                                                      |
+| `406` Not Acceptable         | Invalid `Accept` header                                                | Yes, with a valid header                                                |
+| `409` Conflict               | Uniqueness/foreign-key/check constraint, or a locked row               | Depends — a duplicate needs different data, a lock may resolve on retry |
+| `413` Content Too Large      | Body/fields/files exceed limits                                        | No, unless the request shrinks                                          |
+| `415` Unsupported Media Type | Body couldn't be parsed at all (bad encoding, wrong content type)      | Yes, with a fixed request                                               |
+| `429` Too Many Requests      | Rate limit exceeded                                                    | Yes, after `Retry-After` seconds                                        |
+| `500` Internal Server Error  | Unhandled failure                                                      | Not meaningfully — treat as a bug to report                             |
 
 ## Worked examples
 

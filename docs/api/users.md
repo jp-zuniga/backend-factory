@@ -10,18 +10,18 @@ icon: lucide/users-round
 GET /auth/profile/
 ```
 
-Always resolves to *the caller's own* account — there is no id in the path,
+Always resolves to _the caller's own_ account — there is no id in the path,
 and no permission is required beyond being authenticated (`permissions` on
 this controller is empty for `GET`). It's the endpoint a client calls after
 login to render "who am I," and returns the same shape as a user detail.
 
 The full collection lives separately, and does need permissions:
 
-| Endpoint | Purpose |
-| --- | --- |
-| `GET /auth/user/` | Paginated list, filterable/searchable |
-| `GET /auth/user/all/` | Unpaginated, inline shape — for a dropdown |
-| `GET/PUT/PATCH/DELETE /auth/user/{id}/` | A specific account |
+| Endpoint                                | Purpose                                    |
+| --------------------------------------- | ------------------------------------------ |
+| `GET /auth/user/`                       | Paginated list, filterable/searchable      |
+| `GET /auth/user/all/`                   | Unpaginated, inline shape — for a dropdown |
+| `GET/PUT/PATCH/DELETE /auth/user/{id}/` | A specific account                         |
 
 `DELETE` here doesn't remove the row: `ApiUser` is a soft-delete model, so
 the account is deactivated (`is_active` becomes `False`) rather than erased.
@@ -57,7 +57,7 @@ PUT /auth/user/{id}/permissions/
 PATCH /auth/user/{id}/permissions/
 ```
 
-These read/replace the *whole set* at once (a list of ids in the body).
+These read/replace the _whole set_ at once (a list of ids in the body).
 To attach or detach a single group or permission without touching the rest
 of the set, use the link endpoints instead:
 
@@ -71,10 +71,10 @@ DELETE /auth/user/{id}/permissions/{permission_id}/
 
 The standalone group/permission resources themselves:
 
-| Endpoint | Notes |
-| --- | --- |
-| `GET/POST /auth/group/`, `GET/PUT/PATCH/DELETE /auth/group/{id}/` | Read/write |
-| `GET /auth/permission/`, `GET /auth/permission/{id}/` | Read-only — Django's built-in `Permission` model isn't meant to be created or edited from this API |
+| Endpoint                                                          | Notes                                                                                              |
+| ----------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| `GET/POST /auth/group/`, `GET/PUT/PATCH/DELETE /auth/group/{id}/` | Read/write                                                                                         |
+| `GET /auth/permission/`, `GET /auth/permission/{id}/`             | Read-only — Django's built-in `Permission` model isn't meant to be created or edited from this API |
 
 ## How permissions are evaluated
 

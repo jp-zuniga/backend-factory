@@ -40,13 +40,13 @@ model's class name with its `Api` prefix stripped, kebab-cased
 
 `route_controller` assembles the final pattern from these pieces:
 
-| Shape | Pattern | Produced for |
-| --- | --- | --- |
-| Collection | `<prefix>/<resource>/` | list controllers |
-| Instance | `<prefix>/<resource>/<pk:id>/` | detail controllers |
-| Sub-resource collection | `<prefix>/<parent>/<pk:parent_id>/<child>/` | `ScopedListController` |
-| Sub-resource instance | `<prefix>/<parent>/<pk:parent_id>/<child>/<pk:id>/` | `ScopedDetailController` |
-| Link | `<prefix>/<parent>/<pk:id>/<relation>/<pk:related>/` | `ModelLinkController` |
+| Shape                   | Pattern                                              | Produced for             |
+| ----------------------- | ---------------------------------------------------- | ------------------------ |
+| Collection              | `<prefix>/<resource>/`                               | list controllers         |
+| Instance                | `<prefix>/<resource>/<pk:id>/`                       | detail controllers       |
+| Sub-resource collection | `<prefix>/<parent>/<pk:parent_id>/<child>/`          | `ScopedListController`   |
+| Sub-resource instance   | `<prefix>/<parent>/<pk:parent_id>/<child>/<pk:id>/`  | `ScopedDetailController` |
+| Link                    | `<prefix>/<parent>/<pk:id>/<relation>/<pk:related>/` | `ModelLinkController`    |
 
 `<pk:...>` is typed per the model's actual primary key —
 `get_pk_type` returns `"uuid"`, `"int"`, or `"str"` by inspecting
@@ -56,7 +56,7 @@ model's class name with its `Api` prefix stripped, kebab-cased
 
 A scoped controller only declares `parent_field`; routing derives the rest.
 `get_parent_model` reads the FK's `related_model` off `model._meta`, so the
-parent's own resource name and primary-key type come from the *relation*, not
+parent's own resource name and primary-key type come from the _relation_, not
 from anything written on the scoped controller itself:
 
 ```python
@@ -113,15 +113,19 @@ router: Final[Router] = Router(
     tags=["auth"],
     urls=sort_urls((
         *route_controllers(
-            ApiUserDetailController, ApiUserListController, ...,
+            ApiUserDetailController,
+            ApiUserListController,
+            ...,
             prefix="auth",
         ),
         route_inferred_controller(
             ctrl=ApiUserGroupsController,
-            prefix="auth", suffix="groups", tail="groups",
+            prefix="auth",
+            suffix="groups",
+            tail="groups",
         ),
         route_link_controller(ApiUserGroupsLinkController, "auth"),
-        ...
+        ...,
     )),
 )
 ```
@@ -132,7 +136,7 @@ then mounts every app router under the root router:
 
 ```python
 router: Final[Router] = Router(prefix="")
-router.include(api_auth.api.router)   # keeps api_auth's own tags
+router.include(api_auth.api.router)  # keeps api_auth's own tags
 schema: Final[OpenAPI] = build_schema(router)
 ```
 

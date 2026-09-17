@@ -72,23 +72,22 @@ abstract, or class creation raises `TypeError` immediately — see
   request, built through `RelationResolver` (see [Operations](operations.md)
   and [Schemas](schemas.md) for how nested/related fields turn into `select_related`/`prefetch_related`).
 - **`build_operation(operation_cls, **kwargs)`** — constructs an operation
-  instance with `mapper`, `schema` and `qs` already filled in from the
-  controller. Every controller method is, in the end, a call to
-  `build_operation(...).run(...)`.
+instance with `mapper`, `schema`and`qs`already filled in from the
+controller. Every controller method is, in the end, a call to`build_operation(...).run(...)`.
 
 ## The CRUD family
 
 All declared in `api_core/controllers/models/detail.py` and `list.py`, all
 generic over `ModelController`:
 
-| Controller | Methods | Use it for |
-| --- | --- | --- |
-| `ModelDetailController` | `GET` `PUT` `PATCH` `DELETE` | a fully editable, deletable row |
-| `ModelReadUpdateDetailController` | `GET` `PUT` `PATCH` | a row that can change but never be deleted |
-| `ModelReadOnlyDetailController` | `GET` | a row clients may only read |
-| `ModelListController` | `GET` `POST` | a paginated collection, creatable |
-| `ModelListAllController` | `GET` | the same rows, unpaginated (`/all`); refuses to expose any nested many-to-many field — see [Schemas](schemas.md#many-to-many) — because that would mean unpaginated nested collections too |
-| `ModelReadOnlyListController` | `GET` | a paginated collection, read-only |
+| Controller                        | Methods                      | Use it for                                                                                                                                                                                 |
+| --------------------------------- | ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `ModelDetailController`           | `GET` `PUT` `PATCH` `DELETE` | a fully editable, deletable row                                                                                                                                                            |
+| `ModelReadUpdateDetailController` | `GET` `PUT` `PATCH`          | a row that can change but never be deleted                                                                                                                                                 |
+| `ModelReadOnlyDetailController`   | `GET`                        | a row clients may only read                                                                                                                                                                |
+| `ModelListController`             | `GET` `POST`                 | a paginated collection, creatable                                                                                                                                                          |
+| `ModelListAllController`          | `GET`                        | the same rows, unpaginated (`/all`); refuses to expose any nested many-to-many field — see [Schemas](schemas.md#many-to-many) — because that would mean unpaginated nested collections too |
+| `ModelReadOnlyListController`     | `GET`                        | a paginated collection, read-only                                                                                                                                                          |
 
 Pick the detail/list pair that matches what the underlying [model base](models.md)
 actually allows — pairing e.g. `ApiSoftDeleteModel` with `ModelDetailController`
@@ -106,7 +105,7 @@ pairing table.
   The detail controller's `put`/`patch` additionally accept an `overwrite`
   query flag (`PutManyToManyQuery` / `PatchManyToManyQuery`, parsed as
   `StrictQuery`) controlling whether the write replaces or merges the m2m set.
-- **`ModelRelationController`**  — a `ModelManyToManyDetailController` with
+- **`ModelRelationController`** — a `ModelManyToManyDetailController` with
   `delete` removed and `put`/`patch` pinned to `overwrite=True` /
   `overwrite=False` respectively; the shape used for a related-collection
   sub-endpoint like `/users/{id}/groups/`.
@@ -116,7 +115,7 @@ pairing table.
   `parent`, `related` and `relation` as the three field names involved, and
   derives `parent_model()` / `related_model()` from them via
   `model._meta.get_field(...)`. Default permissions are `view`/`add`/`delete`
-  on the *relation*, from `api_auth.services.permissions`. Used for endpoints
+  on the _relation_, from `api_auth.services.permissions`. Used for endpoints
   like `/users/{id}/groups/{related}/`.
 
 ## The scoped family

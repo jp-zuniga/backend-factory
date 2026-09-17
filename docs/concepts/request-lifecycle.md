@@ -71,7 +71,7 @@ Inside `Endpoint.__call__`, before the controller method ever runs:
    calls `build_user_context` to attach the authenticated user to the
    `pghistory` context opened by the history middleware. If every auth in the
    sequence returns `None`, `NotAuthenticatedError` is raised (`401`). This is
-   why permissions run *inside* auth rather than as a separate step: by the
+   why permissions run _inside_ auth rather than as a separate step: by the
    time a permission is checked, the request already has a concrete user.
 4. **Throttling after auth.** A second, per-endpoint throttle round can key on
    things only known after authentication (e.g. the user id) — none of the

@@ -47,17 +47,17 @@ operation_id = "-".join((*segments, action))
 ```
 
 `segments` are the url's non-parameter parts (`{id}`-style segments dropped);
-`action` is the HTTP method lowercased, *unless* the controller is a
+`action` is the HTTP method lowercased, _unless_ the controller is a
 `ModelController`, in which case `ModelOperationIdEndpoint` maps method +
 instance-vs-collection onto a friendlier verb:
 
-| Method | Collection | Instance |
-| --- | --- | --- |
-| `GET` | `list` | `retrieve` |
-| `POST` | `create` | `append` |
-| `PUT` | `replace` | `update` |
-| `PATCH` | `merge` | `modify` |
-| `DELETE` | `clear` | `destroy` |
+| Method   | Collection | Instance   |
+| -------- | ---------- | ---------- |
+| `GET`    | `list`     | `retrieve` |
+| `POST`   | `create`   | `append`   |
+| `PUT`    | `replace`  | `update`   |
+| `PATCH`  | `merge`    | `modify`   |
+| `DELETE` | `clear`    | `destroy`  |
 
 So `GET /auth/user/{id}/` becomes `auth-user-retrieve`, and
 `GET /auth/user/` becomes `auth-user-list`. Every generated id is registered
@@ -87,7 +87,7 @@ ThrottleExceededSpec = ResponseSpec(
 
 `ERROR_SPECS` is registered once, globally, as `Settings.responses` in
 `api_core.settings.DMR_SETTINGS` — every endpoint's documented responses
-therefore include the *entire* error catalog automatically, not just the
+therefore include the _entire_ error catalog automatically, not just the
 subset a given handler happens to raise explicitly. A controller only adds
 `ResponseSpec`s of its own for successful, non-default status codes (a `204`
 from a `delete`, for instance is handled by `dmr`'s `@modify(status_code=...)`
@@ -99,7 +99,7 @@ Each `AsyncAuth` in a controller's `auth` sequence contributes its own
 `security_schemes` and `security_requirement` to the document, keyed by
 `security_scheme_name`:
 
-- **`JwtCookieAsyncAuth`** contributes *two* schemes: an `apiKey`-in-cookie
+- **`JwtCookieAsyncAuth`** contributes _two_ schemes: an `apiKey`-in-cookie
   scheme named after `cookie_name` (`"jwtCookie"`), and a second `apiKey`-in-header
   scheme for the CSRF header (`CONFIG.csrf_header`) — because a browser client
   authenticated by cookie must also present a CSRF token (see

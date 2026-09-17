@@ -51,7 +51,7 @@ Four methods, three of them fixed by the family and one the framework calls:
   resolves any many-to-many field into a nested tuple of `Get` schemas along
   the way.
 - **`run`** is what the controller actually calls. It is defined once per
-  *shape* (create, retrieve, update, destroy — in `base.py`) and is **not**
+  _shape_ (create, retrieve, update, destroy — in `base.py`) and is **not**
   meant to be overridden: it owns error translation (`exc_handler`, below)
   and the call order of `dump` → `execute` → `map`. A custom operation
   overrides `execute`, not `run`.
@@ -117,7 +117,7 @@ rewriting `{"parent": uuid}` into `{"parent_id": uuid}` so a bare
 ## Scoped create
 
 `ScopedCreateOperation` extends `ForeignKeyCreateOperation` with one addition:
-a `defaults` dict, merged into the payload *after* the client's data:
+a `defaults` dict, merged into the payload _after_ the client's data:
 
 ```python
 async def execute(self, data: dict) -> DatabaseModel:
@@ -170,16 +170,16 @@ before reading it back.
 ## Link operations
 
 `LinkAttachOperation`, `LinkDetachOperation` and `LinkInspectOperation`
-operate on the *through* row of a many-to-many relation directly, addressed
+operate on the _through_ row of a many-to-many relation directly, addressed
 by both ends of the relation (`RelatedInstancePath`, see
 [Schemas → path schemas](schemas.md)). Their `build_lookup` turns the two
 path segments into `{"parent_id": ..., "related_id": ...}`; on a conflict or
-missing row, `find_missing` queries each side independently to say *which*
+missing row, `find_missing` queries each side independently to say _which_
 id does not exist, rather than a generic "not found". `FlatLinkAttachOperation`
 uses `aget_or_create` (attaching twice is not an error — it returns the
 existing row); `FlatLinkDetachOperation` deletes by that lookup; and
 `FlatLinkInspectOperation` is a plain `aget` — this is the operation family
-behind the *link* controllers in [Controllers](controllers.md).
+behind the _link_ controllers in [Controllers](controllers.md).
 
 ## Integrity errors and the transaction boundary
 
@@ -193,7 +193,7 @@ write it triggers commit or roll back together — a child conflict after the
 parent was created rolls the parent back too, rather than leaving an
 orphaned parent row. `scope_child_conflict` in `nested.py` goes one step
 further: on a bulk write, it re-plays the conflicting batch one row at a
-time (`probe_conflict_index`) to find *which* item in the list caused the
+time (`probe_conflict_index`) to find _which_ item in the list caused the
 `IntegrityError`, so the `409` response's field error names the offending
 index instead of just the field.
 

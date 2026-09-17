@@ -5,8 +5,8 @@ icon: lucide/database
 # Database
 
 The application layer validates shapes and orchestrates writes; PostgreSQL is
-trusted to make a handful of guarantees hold *no matter who or what writes to
-a table* — the ORM, a management command, a migration, or a human with
+trusted to make a handful of guarantees hold _no matter who or what writes to
+a table_ — the ORM, a management command, a migration, or a human with
 `psql`. This template leans on triggers and constraints for exactly the rules
 that would otherwise have to be re-checked in every operation, every
 migration, and every one-off script, forever. See
@@ -27,7 +27,7 @@ declaratively in a model's `Meta.triggers`. Four kinds recur:
   changed once `confirmed_at` is set, and protects `confirmed_at` itself
   from being cleared once set, each guarded by a `pgtrigger.Q` condition
   comparing `old__*` to `new__*`.
-- **ReadOnly** — reject a change to *specific columns* while allowing others.
+- **ReadOnly** — reject a change to _specific columns_ while allowing others.
   `ApiModel` uses it on `id`; `VerificationCode` uses it on every field that
   is set at creation and never meant to move again (`api_user`, `email`,
   `token_hash`, `expires_at`, `purpose`, `created_at`), leaving only the two
@@ -61,7 +61,7 @@ writing large collections (see [Operations](operations.md)).
 - **Check constraints**: `VerificationCode` also declares
   `CheckConstraint(condition=Q(purpose__in=VerificationPurposes.values), ...)`,
   `CheckConstraint(condition=Q(expires_at__gt=F("created_at")), ...)`, and one
-  enforcing that a code cannot be both consumed *and* invalidated
+  enforcing that a code cannot be both consumed _and_ invalidated
   (`Q(consumed_at__isnull=True) | Q(invalidated_at__isnull=True)`) — three
   invariants that would otherwise need re-checking in every code path that
   touches the table.
@@ -88,7 +88,7 @@ constraint declared `DEFERRABLE INITIALLY DEFERRED` is only checked at
 `IntegrityError` raised at commit time carries no useful context about which
 row or column caused it, well after the code that could build a precise
 `409` has already returned. Forcing an immediate check right after the write
-means any deferred constraint fails *inside* `exec_nested_post` /
+means any deferred constraint fails _inside_ `exec_nested_post` /
 `exec_m2m_post`, while `exc_handler` (see [Operations](operations.md)) still
 has the lookup and the row in scope to build a field-scoped error. As shipped,
 no model in this template currently declares a `deferrable=` constraint — the
@@ -99,7 +99,7 @@ keys is the textbook case), and it is a no-op otherwise.
 
 Every `@track_table`-decorated model (see [Models](models.md)) writes an
 append-only `<Model>Event` row on every insert and update, via triggers
-`pghistory` installs itself. What ties an event back to *why* it happened is
+`pghistory` installs itself. What ties an event back to _why_ it happened is
 context, attached per request by `api_middlewares.history.contextful_history`:
 
 ```python
@@ -134,7 +134,7 @@ def lock_instance(*, lookup: dict, model: type[DatabaseModel]) -> DatabaseModel:
 ```
 
 `select_for_update(no_key=True)` takes a `FOR NO KEY UPDATE` lock rather than
-a plain `FOR UPDATE`, so a concurrent insert of a *new* row referencing this
+a plain `FOR UPDATE`, so a concurrent insert of a _new_ row referencing this
 one via foreign key is not blocked by the lock — only a concurrent update to
 this same row is. `guarded_lock` wraps the wait in
 [`django-pglock`](https://django-pglock.readthedocs.io/)'s

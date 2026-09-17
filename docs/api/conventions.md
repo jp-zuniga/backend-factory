@@ -9,16 +9,16 @@ that follow don't have to repeat them.
 
 ## Status codes
 
-| Verb | Success | Notes |
-| --- | --- | --- |
-| `GET` | `200` | |
-| `POST` | `200`/`201`/`202`/`204` | Varies by endpoint — a challenge response uses `202`, a pure action (confirm, disable) uses `204` |
-| `PUT` | `200` | Full replace |
-| `PATCH` | `200` | Partial update |
-| `DELETE` | `204` | |
+| Verb     | Success                 | Notes                                                                                             |
+| -------- | ----------------------- | ------------------------------------------------------------------------------------------------- |
+| `GET`    | `200`                   |                                                                                                   |
+| `POST`   | `200`/`201`/`202`/`204` | Varies by endpoint — a challenge response uses `202`, a pure action (confirm, disable) uses `204` |
+| `PUT`    | `200`                   | Full replace                                                                                      |
+| `PATCH`  | `200`                   | Partial update                                                                                    |
+| `DELETE` | `204`                   |                                                                                                   |
 
 Calling a method a controller doesn't expose answers `405`, with an `Allow`
-header listing what the controller *does* accept.
+header listing what the controller _does_ accept.
 
 ## Pagination
 
@@ -32,7 +32,9 @@ envelope:
   "elements": 134,
   "pages": 7,
   "current": 1,
-  "results": [ /* … */ ]
+  "results": [
+    /* … */
+  ]
 }
 ```
 
@@ -40,10 +42,10 @@ envelope:
 direction), not links. Two query parameters control paging on every list
 endpoint:
 
-| Param | Default | Notes |
-| --- | --- | --- |
-| `page` | `1` | |
-| `page_size` | `20` | Capped at `100` |
+| Param       | Default | Notes           |
+| ----------- | ------- | --------------- |
+| `page`      | `1`     |                 |
+| `page_size` | `20`    | Capped at `100` |
 
 Every list-shaped resource also ships an **unpaginated** twin at `.../all/`
 (for example `/auth/user/all/`) that returns a bare JSON array with no
@@ -77,7 +79,7 @@ Both return the full resource on success, same as a `GET`.
 
 Some resources hang off a parent, e.g. a user's groups at
 `/auth/user/{id}/groups/`. A `404` on a sub-resource url usually means the
-*parent* wasn't found (or doesn't belong to you) rather than the child —
+_parent_ wasn't found (or doesn't belong to you) rather than the child —
 sub-resource lookups are scoped to their parent, so a real child row that
 belongs to a different parent still reads as "not found," not "forbidden."
 
@@ -87,12 +89,12 @@ Public, unauthenticated endpoints (login, register, refresh, and the rest of
 the auth surface) are throttled per client address. A throttled request gets
 `429 Too Many Requests` with:
 
-| Header | Meaning |
-| --- | --- |
-| `Retry-After` | Seconds until the limit resets |
-| `X-RateLimit-Limit` | The limit's ceiling |
+| Header                  | Meaning                             |
+| ----------------------- | ----------------------------------- |
+| `Retry-After`           | Seconds until the limit resets      |
+| `X-RateLimit-Limit`     | The limit's ceiling                 |
 | `X-RateLimit-Remaining` | Requests left in the current window |
-| `X-RateLimit-Reset` | When the window resets |
+| `X-RateLimit-Reset`     | When the window resets              |
 
 See [API → Errors](errors.md#status-codes) for the response body shape.
 

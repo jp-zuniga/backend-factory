@@ -4,7 +4,7 @@ icon: lucide/gavel
 
 # Decisions
 
-The rest of this section explains how things work. This page explains *why*
+The rest of this section explains how things work. This page explains _why_
 they work that way — the calls that are easy to second-guess later, the
 reasoning behind each one, and what reversing it would actually cost.
 
@@ -50,7 +50,7 @@ be a check in a Django `save()` override or a service function instead of a
 because a trigger cannot be bypassed by a bulk `.update()`, a management
 command, a migration's `RunPython`, or a future developer who does not know
 the rule exists and reaches for the ORM directly — the guarantee holds
-*structurally*, not because every code path remembered to check it. The cost
+_structurally_, not because every code path remembered to check it. The cost
 is that the rule becomes invisible to a plain `grep` through `services/` —
 you have to know to look at a model's `Meta.triggers` — and that a violated
 trigger surfaces as a generic `IntegrityError`/`500` unless an operation's

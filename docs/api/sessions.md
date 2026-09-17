@@ -85,7 +85,7 @@ The web variant (`POST /auth/web/verify/`) takes no body — it reads whatever
 `access`/`refresh` cookies are present and reports both independently:
 
 ```json title="200 OK"
-{"access": true, "refresh": false}
+{ "access": true, "refresh": false }
 ```
 
 ## Logging out
@@ -110,11 +110,11 @@ stale copy and getting confusing `401`s later otherwise.
 
 ## Errors to expect
 
-| Situation | Status | Notes |
-| --- | --- | --- |
-| Bad username/password | `401` | Deliberately generic — never says which was wrong |
-| Unconfirmed email | `403` | See [Email confirmation](email-confirmation.md); only when `REQUIRE_EMAIL_VERIFICATION` is on |
-| Revoked/expired/reused token | `401` | Covers a spent refresh token, a blocklisted session, and a plain expiry |
-| Missing/invalid CSRF header (web) | `403` | See [Authentication](authentication.md) |
+| Situation                         | Status | Notes                                                                                         |
+| --------------------------------- | ------ | --------------------------------------------------------------------------------------------- |
+| Bad username/password             | `401`  | Deliberately generic — never says which was wrong                                             |
+| Unconfirmed email                 | `403`  | See [Email confirmation](email-confirmation.md); only when `REQUIRE_EMAIL_VERIFICATION` is on |
+| Revoked/expired/reused token      | `401`  | Covers a spent refresh token, a blocklisted session, and a plain expiry                       |
+| Missing/invalid CSRF header (web) | `403`  | See [Authentication](authentication.md)                                                       |
 
 See [API → Errors](errors.md) for the response body shape.
