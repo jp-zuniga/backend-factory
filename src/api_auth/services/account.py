@@ -51,7 +51,7 @@ def settle_email(token: str) -> ApiUser:
 
     Raises:
         reject_code: When the token is not live, or when its address
-            is no longer the account's address.
+                     is no longer the account's address.
 
     """
 

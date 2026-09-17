@@ -35,7 +35,7 @@ from django_filters import (
     TypedMultipleChoiceFilter as EnumlessMultipleChoiceFilter,
     UUIDFilter,
 )
-from pydantic import create_model, model_validator
+from pydantic import Field, create_model, model_validator
 
 from api_core.filters import (
     DecimalFilter,
@@ -154,7 +154,12 @@ def build_filter_query[  # ruff: ignore[complex-structure, too-many-branches, to
             case _:
                 hint = str
 
-        kwargs[name] = (hint | None, None)
+        kwargs[name] = (
+            hint | None,
+            Field(default=None, examples=[member.value for member in hint])
+            if isinstance(hint, EnumType)
+            else None,
+        )
 
     for name, default in defaults.items():
         if name not in kwargs:

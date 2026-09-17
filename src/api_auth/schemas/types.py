@@ -14,7 +14,11 @@ type Email = Annotated[
     StringConstraints(max_length=254),
 ]
 
-type RequiredEmail = Annotated[Email, StringConstraints(min_length=1)]
+type RequiredEmail = Annotated[
+    Email,
+    AfterValidator(func=ApiUser.objects.normalize_email),
+    StringConstraints(max_length=254, min_length=1),
+]
 
 type JwtToken = Annotated[str, StringConstraints(max_length=512, min_length=1)]
 type Password = Annotated[str, StringConstraints(max_length=256, min_length=1)]
