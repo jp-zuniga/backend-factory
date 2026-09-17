@@ -48,7 +48,11 @@ class ApiUserGroupsMixin:
 class ApiUserGroupsLinkMixin:
     permissions: ClassVar[dict[HTTPMethod, Sequence[str]]] = {
         HTTPMethod.GET: (T_VIEW_PERM, model_permission("view", ApiUser)),
-        HTTPMethod.PUT: (T_ADD_PERM, model_permission("view", ApiUser), "{}.add_{}"),
+        HTTPMethod.PUT: (
+            T_ADD_PERM,
+            model_permission("view", ApiUser),
+            "{app}.add_{model}",
+        ),
         HTTPMethod.DELETE: (
             T_DELETE_PERM,
             model_permission("view", ApiUser),

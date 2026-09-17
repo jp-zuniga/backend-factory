@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING, override
 
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import IntegrityError
+from django.db.transaction import TransactionManagementError
 
 from api_exceptions.enums import RequestScopes
 from api_exceptions.errors import ConflictError, NotFoundError
@@ -80,6 +81,17 @@ class ModelOperation[Get: DTO](ABC):
             raise ConflictError.from_integrity_error(i).scoped(cls.scope) from i
         except ObjectDoesNotExist as o:
             raise NotFoundError(field_errors=lookup).scoped(RequestScopes.PATH) from o
+        except TransactionManagementError as t:
+            # a query issued while unwinding an already-broken transaction
+            # (e.g. pgtrigger's `ignore()` cleanup) can mask the integrity
+            # error that broke it; recover it from the chain instead of
+            # surfacing an unrelated 500.
+            if isinstance(t.__cause__, IntegrityError):
+                raise ConflictError.from_integrity_error(t.__cause__).scoped(
+                    cls.scope,
+                ) from t
+
+            raise
 
 
 ########################################################################################

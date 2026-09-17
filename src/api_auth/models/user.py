@@ -24,7 +24,7 @@ from pgtrigger import (
     Update,
 )
 
-from api_core.models.base import ApiModel, ApiSoftDeleteModel
+from api_core.models.base import ApiSoftDeleteModel
 from api_utils.db import ImmutableUnaccent, track_table
 
 from .manager import ApiUserManager
@@ -73,7 +73,7 @@ class ApiUser(ApiSoftDeleteModel, AbstractBaseUser, PermissionsMixin):
     EMAIL_FIELD: Final[str] = "email"
     USERNAME_FIELD: Final[str] = "username"
 
-    class Meta(ApiModel.Meta):
+    class Meta(ApiSoftDeleteModel.Meta):
         constraints: Sequence[UniqueConstraint] = (
             UniqueConstraint(
                 Lower("email"),
@@ -110,7 +110,7 @@ class ApiUser(ApiSoftDeleteModel, AbstractBaseUser, PermissionsMixin):
 
         ordering: Sequence[str] = ("username",)
         triggers: Sequence[Trigger] = (
-            *ApiModel.Meta.triggers,
+            *ApiSoftDeleteModel.Meta.triggers,
             Protect(name="trg_apiuser_protect_insert", operation=Insert),
             Trigger(
                 condition=TriggerQ(old__email__df=TriggerF("new__email")),

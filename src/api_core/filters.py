@@ -70,11 +70,11 @@ class LoweredFilter(CharFilter):
 
 class LoweredSearchFilter(LoweredFilter):
     @override
-    def __init__(
+    def __init__(  # ty: ignore[invalid-method-override]
         self,
+        *search_fields: str,
         field_name: str | None = None,
         lookup_expr: str | None = None,
-        *search_fields: str,
         distinct: bool = False,
         exclude: bool = False,
         label: str | None = None,
@@ -130,7 +130,7 @@ class TypedChoiceFilter(ChoiceFilter):
     ) -> None:
         if enum is None or not issubclass(enum, TextChoices):
             raise ValueError(
-                "Must provide a TextChoices subclass for enum keyword-argument.",
+                "Must provide a `TextChoices` subclass for the `enum` keyword-argument."
             )
 
         self.enum = enum
