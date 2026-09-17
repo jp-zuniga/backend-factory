@@ -204,6 +204,19 @@ class ApiConfig(BaseSettings, PermissiveDTO):
         return str(self.FRONTEND_URL).rstrip("/")
 
     @cached_property
+    def default_mailer(self) -> dict:
+        return {
+            "BACKEND": self.EMAIL_BACKEND,
+            "OPTIONS": {
+                "host": self.EMAIL_HOST,
+                "username": self.EMAIL_HOST_USER,
+                "password": self.EMAIL_HOST_PASSWORD,
+                "port": self.EMAIL_PORT,
+                "use_tls": self.EMAIL_USE_TLS,
+            },
+        }
+
+    @cached_property
     def pg_database(self) -> dict:
         return {
             "ATOMIC_REQUESTS": False,

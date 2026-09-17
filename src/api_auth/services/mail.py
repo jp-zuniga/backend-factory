@@ -85,7 +85,6 @@ async def send_template(
     # never sends a message about a record that does not exist
     await sync_to_async(func=on_commit)(
         lambda: send_mail(
-            fail_silently=True,
             from_email=None,
             message=body,
             recipient_list=[to],
