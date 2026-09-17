@@ -3,7 +3,7 @@ from contextlib import contextmanager
 from typing import TYPE_CHECKING, override
 
 from django.core.exceptions import ObjectDoesNotExist
-from django.db import IntegrityError
+from django.db import DataError, IntegrityError
 from django.db.transaction import TransactionManagementError
 
 from api_exceptions.enums import RequestScopes
@@ -79,13 +79,15 @@ class ModelOperation[Get: DTO](ABC):
             yield
         except IntegrityError as i:
             raise ConflictError.from_integrity_error(i).scoped(cls.scope) from i
-        except ObjectDoesNotExist as o:
+        except (DataError, ObjectDoesNotExist) as o:
+            # DataError covers values a column can't even represent
+            # such a value can never match a row, so 404
             raise NotFoundError(field_errors=lookup).scoped(RequestScopes.PATH) from o
         except TransactionManagementError as t:
             # a query issued while unwinding an already-broken transaction
-            # (e.g. pgtrigger's `ignore()` cleanup) can mask the integrity
+            # (like pgtrigger.ignore()'s cleanup) can mask the integrity
             # error that broke it; recover it from the chain instead of
-            # surfacing an unrelated 500.
+            # surfacing an unrelated 500
             if isinstance(t.__cause__, IntegrityError):
                 raise ConflictError.from_integrity_error(t.__cause__).scoped(
                     cls.scope,

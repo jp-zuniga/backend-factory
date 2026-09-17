@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, ClassVar, override
 
 from django.core.exceptions import ObjectDoesNotExist
-from django.db import IntegrityError
+from django.db import DataError, IntegrityError
 
 from api_exceptions.enums import RequestScopes
 from api_exceptions.errors import ConflictError, NotFoundError
@@ -55,7 +55,12 @@ class LinkOperation[Get: DTO](ModelOperation[Get], ABC):
         ):
             model: type[DatabaseModel] = through._meta.get_field(field).related_model
 
-            if not await model._default_manager.filter(pk=value).aexists():
+            try:
+                exists: bool = await model._default_manager.filter(pk=value).aexists()
+            except DataError:
+                exists = False
+
+            if not exists:
                 return name
 
         return None
@@ -84,13 +89,19 @@ class LinkAttachOperation[Get: DTO](LinkOperation[Get], ABC):
 
         try:
             await self.execute(lookup)
-        except IntegrityError as i:
-            if (missing := await self.find_missing(path)) is None:
-                raise ConflictError.from_integrity_error(i).scoped(self.scope) from i
+        except (DataError, IntegrityError) as e:
+            missing: str | None = await self.find_missing(path)
+
+            if missing is None:
+                if isinstance(e, IntegrityError):
+                    raise ConflictError.from_integrity_error(e).scoped(
+                        self.scope,
+                    ) from e
+                raise
 
             raise NotFoundError(
                 field_errors={missing: getattr(path, missing)},
-            ).scoped(self.scope) from i
+            ).scoped(self.scope) from e
 
     @abstractmethod
     @override
@@ -108,8 +119,11 @@ class LinkDetachOperation[Get: DTO](LinkOperation[Get], ABC):
     async def run(self, path: RelatedInstancePath) -> None:
         lookup: dict = self.build_lookup(path)
 
-        if await self.execute(lookup):
-            return
+        try:
+            if await self.execute(lookup):
+                return
+        except DataError:
+            pass
 
         await self.raise_missing(path)
 
@@ -131,7 +145,7 @@ class LinkInspectOperation[Get: DTO](LinkOperation[Get], ABC):
 
         try:
             obj: DatabaseModel = await self.execute(lookup)
-        except ObjectDoesNotExist:
+        except DataError, ObjectDoesNotExist:
             await self.raise_missing(path)
 
         return self.map(obj)
