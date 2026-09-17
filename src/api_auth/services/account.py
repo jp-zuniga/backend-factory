@@ -84,7 +84,7 @@ async def confirm_email(token: str) -> ApiUser:
 
 
 async def issue_email_verification(user: ApiUser) -> None:
-    if not user.email or user.email_verified_at is not None:
+    if not CONFIG.REQUIRE_EMAIL_VERIFICATION or user.email_verified_at is not None:
         return
 
     await issue_code(

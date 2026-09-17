@@ -11,6 +11,7 @@ from dmr.test import DMRClient
 from api_auth.enums import ApiUserTypes, VerificationPurposes
 from api_auth.models import ApiUser
 from api_auth.services.verification import LIFETIMES
+from api_core.config import CONFIG
 from api_tests.conftest import PASSWORD
 from api_tests.helpers import PatchedHttpResponse, assert_field_error, route
 
@@ -19,6 +20,14 @@ from api_tests.helpers import PatchedHttpResponse, assert_field_error, route
 pytestmark = pytest.mark.django_db
 
 ########################################################################################
+
+
+@pytest.fixture(autouse=True)
+def require_email_verification(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(
+        "api_auth.services.account.CONFIG",
+        CONFIG.model_copy(update={"REQUIRE_EMAIL_VERIFICATION": True}),
+    )
 
 
 @pytest.fixture

@@ -148,21 +148,10 @@ def test_register_rejects_invalid_email(
     )
 
     assert response.status_code == HTTPStatus.BAD_REQUEST
-    assert assert_field_error(response, "body.email") == "Debe ser un correo válido."
-
-
-def test_register_accepts_an_empty_email(
-    dmr_client: DMRClient,
-    seeded_groups: dict[str, Group],
-) -> None:
-    response: PatchedHttpResponse = dmr_client.post(
-        route("auth-register"),
-        data=registration_body(email=""),
+    assert (
+        assert_field_error(response, "body.email")
+        == "'no-es-un-correo' no es un valor válido."
     )
-
-    assert response.status_code == HTTPStatus.CREATED
-
-    assert response.json()["email"] == ""  # ruff: ignore[compare-to-empty-string]
 
 
 def test_register_rejects_a_non_client_group(
@@ -458,6 +447,7 @@ def test_user_create_without_relations(
         route("auth-user-list"),
         data={
             "username": "minimo",
+            "email": "min@unit.example.com",
             "password1": PASSWORD,
             "password2": PASSWORD,
         },
@@ -475,6 +465,7 @@ def test_user_create_reports_unknown_relations(
         route("auth-user-list"),
         data={
             "username": "con-grupo-falso",
+            "email": "min@unit.example.com",
             "password1": PASSWORD,
             "password2": PASSWORD,
             "groups": [987654],
