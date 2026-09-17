@@ -70,15 +70,15 @@ class ApiConfig(BaseSettings, PermissiveDTO):
     TOTP_TOLERANCE: NonNegativeInt = 1
 
     DEFAULT_FROM_EMAIL: str = "no-reply@localhost"
-    EMAIL_BACKEND: str = "django.core.mail.backends.console.EmailBackend"
-    EMAIL_HOST: str = ""
+    EMAIL_BACKEND: str = "django.core.mail.backends.smtp.EmailBackend"
+    EMAIL_HOST: str = "smtp.resend.com"
     EMAIL_HOST_PASSWORD: OptionalSecret = SecretStr(secret_value="")
-    EMAIL_HOST_USER: str = ""
+    EMAIL_HOST_USER: str = "resend"
     EMAIL_PORT: PositiveInt = 587
     EMAIL_USE_TLS: bool = True
 
     EMAIL_VERIFICATION_LIFETIME: timedelta = timedelta(hours=24)
-    REQUIRE_EMAIL_VERIFICATION: bool = True
+    REQUIRE_EMAIL_VERIFICATION: bool = False
 
     FRONTEND_URL: HttpUrl = HttpUrl(url="http://localhost:3000")
 
@@ -210,7 +210,7 @@ class ApiConfig(BaseSettings, PermissiveDTO):
             "OPTIONS": {
                 "host": self.EMAIL_HOST,
                 "username": self.EMAIL_HOST_USER,
-                "password": self.EMAIL_HOST_PASSWORD,
+                "password": self.EMAIL_HOST_PASSWORD.get_secret_value(),
                 "port": self.EMAIL_PORT,
                 "use_tls": self.EMAIL_USE_TLS,
             },
