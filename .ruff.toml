@@ -36,6 +36,18 @@ preview = true
   [lint.per-file-ignores]
     "**/api_core/**" = ["private-member-access"]
 
+    "**/api_tests/**" = [
+      "assert",
+      "hardcoded-password-func-arg",
+      "hardcoded-password-string",
+      "magic-value-comparison",
+      "pytest-fixture-autouse",
+      "typing-only-first-party-import",
+      "typing-only-standard-library-import",
+      "typing-only-third-party-import",
+      "unused-function-argument",
+    ]
+
     "**/config.py" = [
       "typing-only-first-party-import",
       "typing-only-standard-library-import",
@@ -60,8 +72,3 @@ preview = true
     ]
 
     "**/settings.py" = ["line-too-long"]
-
-    "**/api_tests/**" = [
-      "assert",
-      "pytest-incorrect-pytest-import",
-    ]

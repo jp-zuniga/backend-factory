@@ -3,14 +3,14 @@
     "def __str__",
   ]
 
-  fail_under = 10
+  fail_under = 90
 
   omit = [
     "*/__init__.py",
-    "*/api_tests/*",
     "*/apps.py",
     "*/management/*",
     "*/migrations/*",
+    "*/*_tests/*",
   ]
 
   show_missing = true
@@ -21,10 +21,15 @@
 
   omit = [
     "*/__init__.py",
-    "*/api_tests/*",
     "*/apps.py",
+    "*/asgi.py",
+    "*/config.py",
+    "*/manage.py",
+    "*/types.py",
+    "*/wsgi.py",
     "*/management/*",
     "*/migrations/*",
+    "*/*_tests/*",
   ]
 
   source = ["src"]

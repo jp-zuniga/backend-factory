@@ -4,6 +4,7 @@
   addopts = [
     "--cov",
     "--cov-report=term-missing",
+    "--numprocesses=4",
     "--quiet",
     "--reuse-db",
   ]
