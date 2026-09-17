@@ -1,40 +1,20 @@
 [project]
   copyright = "&copy 2026, Joaquín Zúñiga"
 
-  edit_uri  = "edit/main/docs/"
+  extra_css = [
+    "stylesheets/theme.css",
+    "stylesheets/width.css",
+  ]
+
   repo_name = "jp-zuniga/backend-factory"
   repo_url  = "https://github.com/jp-zuniga/backend-factory"
 
   site_author      = "Joaquín Zúñiga"
-  site_description = "backend factory!"
+  site_description = "backend-factory"
   site_name        = "backend-factory"
 
   nav = [
     { "Home" = "index.md" },
-    {
-      "Getting started" = [
-        "getting-started/index.md",
-        "getting-started/requirements.md",
-        "getting-started/installation.md",
-        "getting-started/layout.md",
-        "getting-started/commands.md",
-      ],
-    },
-    {
-      "Concepts" = [
-        "concepts/index.md",
-        "concepts/request-lifecycle.md",
-        "concepts/controllers.md",
-        "concepts/schemas.md",
-        "concepts/operations.md",
-        "concepts/models.md",
-        "concepts/database.md",
-        "concepts/routing.md",
-        "concepts/errors.md",
-        "concepts/openapi.md",
-        "concepts/decisions.md",
-      ],
-    },
     {
       "API" = [
         "api/index.md",
@@ -45,26 +25,6 @@
         "api/two-factor.md",
         "api/users.md",
         "api/errors.md",
-      ],
-    },
-    {
-      "Guides" = [
-        "guides/index.md",
-        "guides/new-resource.md",
-        "guides/sub-resources.md",
-        "guides/base-models.md",
-        "guides/permissions.md",
-        "guides/seeding.md",
-        "guides/email.md",
-        "guides/testing.md",
-        "guides/deployment.md",
-      ],
-    },
-    {
-      "Reference" = [
-        "reference/index.md",
-        "reference/configuration.md",
-        "reference/catalog.md",
       ],
     },
   ]
@@ -116,8 +76,8 @@
           object    = "pymdownx.slugs.slugify",
         }
 
-    [project.markdown_extensions.zensical.extensions]
-      preview.configurations.targets.include = ["**/*.md"]
+    [[project.markdown_extensions.zensical.extensions.preview.configurations]]
+      targets.include = ["**/*.md"]
 
   [project.theme]
     features = [

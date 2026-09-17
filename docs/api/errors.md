@@ -4,9 +4,8 @@ icon: lucide/circle-alert
 
 # Errors
 
-The internal error hierarchy and the handler that renders it live under
-[Concepts → Errors](../concepts/errors.md). This page is the client-facing
-view: what a failure actually looks like on the wire.
+What a failure actually looks like on the wire, for every endpoint in the
+API.
 
 ## Response shape
 
@@ -21,48 +20,48 @@ Every error response, regardless of status code, is the same shape:
 }
 ```
 
-- **`detail`** — always present. A short, human-readable message. For
-  several error types it doubles as a machine-checkable classification
-  (e.g. `"Uno o más campos no se pudieron validar."` for a failed
-  validation) — treat it as informational text, not as a stable enum, unless
-  a specific endpoint's docs say otherwise.
-- **`field_errors`** — present only when the failure can be pinned to
-  specific fields; `null`/absent otherwise. Keys are dotted paths that name
-  _which part of the request_ the field lives in, then the field itself.
+`detail` is always present: a short, human-readable message. For several
+error types it doubles as a machine-checkable classification (for example
+`"Uno o más campos no se pudieron validar."` for a failed validation), but
+it should be treated as informational text, not a stable enum, unless a
+specific endpoint's docs say otherwise. `field_errors` is present only when
+the failure can be pinned to specific fields, and `null` or absent
+otherwise. Its keys are dotted paths naming which part of the request the
+field lives in, then the field itself.
 
 ## Where a field error points
 
-| Prefix      | Part of the request |
-| ----------- | ------------------- |
-| `body.*`    | JSON request body   |
-| `query.*`   | Query string        |
-| `path.*`    | URL path parameters |
-| `cookies.*` | Cookies             |
-| `headers.*` | Request headers     |
-| `files.*`   | Uploaded files      |
+|   Prefix    | Part of the request |
+| :---------: | :-----------------: |
+|  `body.*`   |  JSON request body  |
+|  `query.*`  |    Query string     |
+|  `path.*`   | URL path parameters |
+| `cookies.*` |       Cookies       |
+| `headers.*` |   Request headers   |
+|  `files.*`  |   Uploaded files    |
 
-So `"body.username": "Este campo es requerido."` means the `username` field
-of the JSON body was missing; `"cookies.csrftoken": "..."` means the problem
-was with a cookie, not the body, even though both can appear on the same
-request.
+So `"body.username": "Este campo es requerido."` means the `username`
+field of the JSON body was missing; `"cookies.csrftoken": "..."` means the
+problem was with a cookie, not the body, even though both can appear on
+the same request.
 
 ## Status codes
 
-| Status                       | When                                                                   | Retry?                                                                  |
-| ---------------------------- | ---------------------------------------------------------------------- | ----------------------------------------------------------------------- |
-| `400` Bad Request            | Body/query/path failed validation                                      | Yes, after fixing the request                                           |
-| `401` Unauthorized           | Missing, invalid, expired, or revoked credentials                      | Only after re-authenticating                                            |
-| `403` Forbidden              | Authenticated, but not permitted; or CSRF failed; or email unconfirmed | No, unless the underlying condition changes                             |
-| `404` Not Found              | No matching row (or a foreign key pointed at one that doesn't exist)   | No                                                                      |
-| `405` Method Not Allowed     | The controller doesn't expose that verb                                | No                                                                      |
-| `406` Not Acceptable         | Invalid `Accept` header                                                | Yes, with a valid header                                                |
-| `409` Conflict               | Uniqueness/foreign-key/check constraint, or a locked row               | Depends — a duplicate needs different data, a lock may resolve on retry |
-| `413` Content Too Large      | Body/fields/files exceed limits                                        | No, unless the request shrinks                                          |
-| `415` Unsupported Media Type | Body couldn't be parsed at all (bad encoding, wrong content type)      | Yes, with a fixed request                                               |
-| `429` Too Many Requests      | Rate limit exceeded                                                    | Yes, after `Retry-After` seconds                                        |
-| `500` Internal Server Error  | Unhandled failure                                                      | Not meaningfully — treat as a bug to report                             |
+|            Status            |                                  When                                  |                                 Retry?                                 |
+| :--------------------------: | :--------------------------------------------------------------------: | :--------------------------------------------------------------------: |
+|      `400` Bad Request       |                   Body/query/path failed validation                    |                     Yes, after fixing the request                      |
+|      `401` Unauthorized      |           Missing, invalid, expired, or revoked credentials            |                      Only after re-authenticating                      |
+|       `403` Forbidden        | Authenticated, but not permitted; or CSRF failed; or email unconfirmed |              No, unless the underlying condition changes               |
+|       `404` Not Found        |  No matching row, or a foreign key pointed at one that doesn't exist   |                                   No                                   |
+|   `405` Method Not Allowed   |                The endpoint doesn't support that method                |                                   No                                   |
+|     `406` Not Acceptable     |                        Invalid `Accept` header                         |                        Yes, with a valid header                        |
+|        `409` Conflict        |        Uniqueness/foreign-key/check constraint, or a locked row        | Depends; a duplicate needs different data, a lock may resolve on retry |
+|   `413` Content Too Large    |                    Body/fields/files exceed limits                     |                     No, unless the request shrinks                     |
+| `415` Unsupported Media Type |   Body couldn't be parsed at all, bad encoding or wrong content type   |                       Yes, with a fixed request                        |
+|   `429` Too Many Requests    |                          Rate limit exceeded                           |                    Yes, after `Retry-After` seconds                    |
+| `500` Internal Server Error  |                           Unhandled failure                            |               Not meaningfully; treat as a bug to report               |
 
-## Worked examples
+## Examples
 
 === "Failed validation (400)"
 
@@ -87,9 +86,8 @@ request.
     }
     ```
 
-    A duplicate-key or foreign-key violation from the database is translated
-    into this shape automatically — see
-    [Concepts → Operations](../concepts/operations.md) for how.
+    A duplicate value or a broken reference to another resource produces
+    this shape automatically.
 
 === "Forbidden (403)"
 
@@ -99,7 +97,7 @@ request.
     }
     ```
 
-    No `field_errors` — the request was well-formed, the caller just isn't
+    No `field_errors`: the request was well-formed, the caller just isn't
     allowed to make it.
 
 === "Throttled (429)"
@@ -118,5 +116,5 @@ request.
     }
     ```
 
-    See [Conventions → Rate limits](conventions.md#rate-limits) for what the
+    See [Conventions, rate limits](conventions.md#rate-limits) for what the
     headers mean.
