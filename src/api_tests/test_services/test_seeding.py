@@ -228,7 +228,7 @@ def test_describe_seeder_with_dependencies() -> None:
 
     entry = next(e for e in get_fixture_seeders() if e.name == "invoices")
 
-    assert describe_seeder(entry) == "billing.invoices (depende de: apiauth.users)"
+    assert describe_seeder(entry) == "billing.invoices (needs: apiauth.users)"
 
 
 ########################################################################################
