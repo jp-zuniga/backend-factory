@@ -20,27 +20,35 @@ def check_api_model_triggers(
     *args,  # ruff: ignore[missing-type-args, unused-function-argument]
     **kwargs,  # ruff: ignore[missing-type-kwargs, unused-function-argument]
 ) -> list[CheckError]:
-    base_triggers: set[Trigger] = set(getattr(ApiModel.Meta, "triggers", ()))
-
     errors = []
 
     for model in apps.get_models():
         if issubclass(model, ApiModel) and not model._meta.abstract:
+            base = ApiModel
+
+            for specific in model.__mro__[1:]:
+                if issubclass(base, ApiModel) and specific._meta.abstract:
+                    base = specific
+
+            required_triggers: set[Trigger] = set(
+                base._meta.original_attrs.get("triggers", ())
+            )
+
             subcls_triggers: set[Trigger] = set(
                 model._meta.original_attrs.get("triggers", ())
             )
 
-            if not base_triggers.issubset(subcls_triggers):
+            if not required_triggers.issubset(subcls_triggers):
                 errors.append(
                     CheckError(
                         id="api_core.E001",
                         hint=(
-                            "Añade `*ApiModel.Meta.triggers,` "
+                            f"Añade `*{base.__name__}.Meta.triggers,` "
                             "al definir nuevos triggers en `Meta`."
                         ),
                         msg=(
                             "Modelos concretos con custom triggers "
-                            "deben heredar `ApiModel.Meta.triggers`."
+                            f"deben heredar `{base.__name__}.Meta.triggers`."
                         ),
                         obj=model,
                     )
