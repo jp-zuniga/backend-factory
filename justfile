@@ -223,6 +223,19 @@ validate *args="": services
 
 ########################################################################################
 
+[group("docker")]
+nuke: (check-dep "docker")
+    docker compose down -v
+
+[group("docker")]
+stop: (check-dep "docker")
+    docker compose stop
+
+[group("docker")]
+up: services
+
+########################################################################################
+
 [group("api")]
 [private]
 api-action target method endpoint args data: (check-dep "jq")
