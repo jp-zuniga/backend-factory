@@ -1,13 +1,13 @@
 from django.contrib.auth.models import Group, Permission
-from django.db.transaction import atomic
 
 from api_auth.enums import ApiUserTypes
+from api_core.seeding import register_structural
 
 ########################################################################################
 
 
-@atomic
-def execute() -> None:
+@register_structural(app_label="apiauth", name="groups_and_permissions")
+def seed_groups_and_permissions() -> None:
     # ruff: disable[commented-out-code]
     # admin_only: Q = (
     #     Q(content_type__app_label__icontains="auth")
