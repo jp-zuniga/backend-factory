@@ -27,7 +27,11 @@ def check_api_model_triggers(
             base = ApiModel
 
             for specific in model.__mro__[1:]:
-                if issubclass(base, ApiModel) and specific._meta.abstract:
+                if (
+                    issubclass(base, ApiModel)
+                    and hasattr(specific, "_meta")
+                    and not specific._meta.abstract
+                ):
                     base = specific
 
             required_triggers: set[Trigger] = set(

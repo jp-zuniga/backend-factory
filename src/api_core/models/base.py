@@ -55,6 +55,7 @@ class ApiModel(Model):
 
     class Meta:
         abstract: bool = True
+
         triggers: Sequence[Trigger] = (
             Trigger(
                 level=Statement,
