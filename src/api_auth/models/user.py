@@ -16,7 +16,6 @@ from django.db.models import (
 from django.db.models.functions import Lower, Upper
 from pgtrigger import (
     After,
-    AnyChange,
     Before,
     Deferred,
     F as TriggerF,
@@ -151,16 +150,25 @@ class ApiUser(ApiSoftDeleteModel, AbstractBaseUser, PermissionsMixin):
                 when=Before,
             ),
             Trigger(
-                name="trg_apiuser_superuser_insert_singleton",
-                func=TriggerFunc(SINGLETON_SUPERUSER),
-                operation=Insert,
-                when=After,
-                level=Row,
-                timing=Deferred,
                 condition=TriggerQ(new__is_superuser=True, new__is_active=True),
+                func=TriggerFunc(SINGLETON_SUPERUSER),
+                level=Row,
+                name="trg_apiuser_superuser_insert_singleton",
+                operation=Insert,
+                timing=Deferred,
+                when=After,
             ),
             Trigger(
-                condition=AnyChange("is_superuser", "is_active"),
+                condition=(
+                    (
+                        TriggerQ(old__is_superuser=True)
+                        | TriggerQ(new__is_superuser=True)
+                    )
+                    & (
+                        TriggerQ(old__is_superuser__df=TriggerF("new__is_superuser"))
+                        | TriggerQ(old__is_active__df=TriggerF("new__is_active"))
+                    )
+                ),
                 func=TriggerFunc(SINGLETON_SUPERUSER),
                 level=Row,
                 name="trg_apiuser_superuser_update_singleton",
