@@ -25,6 +25,6 @@ REVERSE: Final[str] = "DROP FUNCTION IF EXISTS public.immutable_unaccent(text);"
 
 
 class Migration(migrations.Migration):
-    dependencies = [("apicore", "0001_postgres_extensions")]
+    dependencies = [("apicore", "0001_extensions")]
 
     operations = [migrations.RunSQL(reverse_sql=REVERSE, sql=FORWARD)]
