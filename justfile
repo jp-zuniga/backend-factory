@@ -61,15 +61,6 @@ pre-commit $DEBUG="False":
 run-frozen *cmd: (check-dep "uv")
     uv run --frozen {{ cmd }}
 
-[private]
-services: (check-dep "docker")
-    #!/usr/bin/env bash
-    set -euo pipefail
-
-    if [ -z "$(docker compose ps -q)" ]; then
-      docker compose up --detach --wait postgres redis
-    fi
-
 ########################################################################################
 
 [group("uv")]
@@ -113,7 +104,7 @@ sync: (check-dep "uv")
     uv sync --frozen
 
 [group("uv")]
-test *args="": services
+test *args="": dc-up
     @just run-frozen pytest {{ args }}
 
 [group("uv")]
@@ -189,56 +180,62 @@ init-local: init-env
 
     just sync
     just prek install
-    just services
+    just dc-up
     just migrate
     just mk-admin
     just dj-man populate
 
 [group("django")]
-migrate *args="": services
+migrate *args="": dc-up
     @just run-frozen {{ manage_py }} migrate {{ args }}
 
 [group("django")]
-mk-admin: services
+mk-admin: dc-up
     #!/usr/bin/env bash
     set -euo pipefail
 
     just run-frozen {{ manage_py }} createsuperuser --noinput
 
 [group("django")]
-mk-migrations *args="": services
+mk-migrations *args="": dc-up
     @just run-frozen {{ manage_py }} makemigrations {{ args }}
     @just fix
     @just fmt
 
 [group("django")]
-run $DEBUG="True" *args="": services validate
+run $DEBUG="True" *args="": dc-up validate
     @just run-frozen granian api_core.asgi:application --reload {{ args }}
 
 [group("django")]
-serve $DEBUG="False" *args="": services validate
+serve $DEBUG="False" *args="": dc-up validate
     @just run-frozen granian api_core.asgi:application {{ args }}
 
 [group("django")]
-validate *args="": services
+validate *args="": dc-up
     @just run-frozen {{ manage_py }} check {{ args }}
 
 ########################################################################################
 
-[group("docker")]
-nuke: (check-dep "docker")
+[group("docker-compose")]
+dc-nuke: (check-dep "docker-compose")
     docker compose down -v
 
-[group("docker")]
-psql: services (check-dep "docker")
+[group("docker-compose")]
+dc-psql: (check-dep "docker-compose") dc-up
     docker exec -it {{ name }}-postgres-1 psql -U {{ name }} -d {{ name }}
 
-[group("docker")]
-stop: (check-dep "docker")
+[group("docker-compose")]
+dc-stop: (check-dep "docker-compose")
     docker compose stop
 
-[group("docker")]
-up: services
+[group("docker-compose")]
+dc-up:
+    #!/usr/bin/env bash
+    set -euo pipefail
+
+    if [ -z "$(docker compose ps -q)" ]; then
+      docker compose up --detach --wait postgres redis
+    fi
 
 ########################################################################################
 
