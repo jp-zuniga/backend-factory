@@ -15,17 +15,23 @@ from django.db.models import (
 )
 from django.db.models.functions import Lower, Upper
 from pgtrigger import (
+    After,
+    AnyChange,
     Before,
+    Deferred,
     F as TriggerF,
+    Func as TriggerFunc,
     Insert,
     Protect,
     Q as TriggerQ,
+    Row,
     Trigger,
     Update,
 )
 
 from api_core.models.base import ApiSoftDeleteModel
 from api_utils.db import ImmutableUnaccent, track_table
+from api_utils.strings import normalize_trigger
 
 from .manager import ApiUserManager
 
@@ -36,6 +42,31 @@ if TYPE_CHECKING:
     from django.db.models import QuerySet
 
     from ty_extensions import Intersection
+
+########################################################################################
+
+SINGLETON_SUPERUSER: Final[str] = normalize_trigger("""
+DECLARE
+    active_superusers INTEGER;
+BEGIN
+    SELECT COUNT(*)
+    INTO active_superusers
+    FROM {meta.db_table}
+    WHERE is_active AND is_superuser;
+    IF active_superusers = 0 THEN
+        RAISE check_violation
+        USING
+            COLUMN = 'is_superuser',
+            MESSAGE = 'Debe existir al menos un superusuario activo.';
+    ELSIF active_superusers > 1 THEN
+        RAISE check_violation
+        USING
+            COLUMN = 'is_superuser',
+            MESSAGE = 'Solo puede existir un superusuario activo a la vez.';
+    END IF;
+    RETURN NULL;
+END;
+""")
 
 ########################################################################################
 
@@ -118,5 +149,23 @@ class ApiUser(ApiSoftDeleteModel, AbstractBaseUser, PermissionsMixin):
                 name="trg_apiuser_unverify_email",
                 operation=Update,
                 when=Before,
+            ),
+            Trigger(
+                name="trg_apiuser_superuser_insert_singleton",
+                func=TriggerFunc(SINGLETON_SUPERUSER),
+                operation=Insert,
+                when=After,
+                level=Row,
+                timing=Deferred,
+                condition=TriggerQ(new__is_superuser=True, new__is_active=True),
+            ),
+            Trigger(
+                condition=AnyChange("is_superuser", "is_active"),
+                func=TriggerFunc(SINGLETON_SUPERUSER),
+                level=Row,
+                name="trg_apiuser_superuser_update_singleton",
+                operation=Update,
+                timing=Deferred,
+                when=After,
             ),
         )
