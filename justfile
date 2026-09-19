@@ -17,6 +17,8 @@ django_user := env("DJANGO_SUPERUSER_USERNAME", "")
 
 django_local := "http://" + django_host + ":" + django_port
 
+name := "api"
+
 ########################################################################################
 
 manage_py := just_dir + "src/manage.py"
@@ -226,6 +228,10 @@ validate *args="": services
 [group("docker")]
 nuke: (check-dep "docker")
     docker compose down -v
+
+[group("docker")]
+psql: services (check-dep "docker")
+    docker exec -it {{ name }}-postgres-1 psql -U {{ name }} -d {{ name }}
 
 [group("docker")]
 stop: (check-dep "docker")
